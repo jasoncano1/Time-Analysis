@@ -19,16 +19,19 @@ const connectToDb = async () => {
   }
 };
 
-connectToDb();
+module.exports = { pool, connectToDb };
+// Example usage of the connection pool to query the database
 
-pool.query('SELECT * FROM tasks', (err, res) => {
-  if (err) {
-    console.error('Error executing query', err.stack);
-  } else {
-    console.log('Current time:', res.rows[0]);
-  }
-}
-);
+// connectToDb();
+
+// pool.query('SELECT * FROM tasks', (err, res) => {
+//   if (err) {
+//     console.error('Error executing query', err.stack);
+//   } else {
+//     console.log('Current time:', res.rows[0]);
+//   }
+// }
+// );
 
 // import pg from 'pg'
 // const { Client } = pg
