@@ -87,10 +87,9 @@ const renderNextWeek = () => {
 const populateWk = async d => {
   weekdays = getWkDays(d);
   tasks = tasks || await getUser(username);
-  dateTimes = tasks.map(obj => obj.date);
-
-  console.log("tasks: ", tasks, dateTimes);
+  console.log('tasks: ', tasks);
   
+  dateTimes = tasks.map(obj => obj.date);
 
   totalDone = 0;
   totalScheduled = 0;
@@ -207,9 +206,6 @@ const renderPreviousWeek = () => {
 };
 
 const renderGauges = () => {  
-
-  console.log("test: ",totalDone, totalScheduled, totalHours);
-  
 
   data = [
     {

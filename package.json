@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Workday Scheduler",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "test": "nodemon server.js",
     "start": "node server.js"
