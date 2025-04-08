@@ -1,5 +1,6 @@
+const { use } = require("../../routes/apiRoutes");
+
 let day;
-let user;
 let hour;
 let data;
 let data2;
@@ -8,6 +9,7 @@ let layout;
 let monday;
 let friday;
 let layout2;
+let user_id;
 let tuesday;
 let weekdays;
 let thursday;
@@ -87,76 +89,78 @@ const renderNextWeek = () => {
 const populateWk = async d => {
   weekdays = getWkDays(d);
   tasks = tasks || await getUser(username);
+  user_id = tasks[0].user_id;
   console.log('tasks: ', tasks);
-  
+
   dateTimes = tasks.map(obj => obj.date);
 
   totalDone = 0;
   totalScheduled = 0;
   main.innerHTML = '';
 
-  // weekdays.forEach((date, i) => {
+  weekdays.forEach((date, i) => {
 
-  //   dateTimes.forEach(dayTime => {
+    dateTimes.forEach(dayTime => {
+      console.log('dayTime: ', dayTime, 'date: ', date);
       
-  //     if (dayTime.includes(date)) {
-  //       totalScheduled += 1;
+      if (dayTime.includes(date)) {
+        totalScheduled += 1;
 
-  //       if (user.tasks.find(obj => obj.date == dayTime).status == "done") {
-  //         totalDone += 1
-  //       };
-  //     };
-  //   });
+        if (tasks.find(obj => obj.date == dayTime).status == "done") {
+          totalDone += 1
+        };
+      };
+    });
 
-  //   main.innerHTML += `
-  //   <section id=${date} class=${new Date() - d > 86400000 ? "past" :
-  //       new Date() - d < -86400000 ? "future" :
-  //         i + 1 < d.getDay() ? "past" :
-  //           i + 1 == d.getDay() ? "present" : "future"
-  //     }>
-      
-  //     <h5>${i == 0 ? `Monday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
-  //       i == 1 ? `Tuesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
-  //         i == 2 ? `Wednesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
-  //           i == 3 ? `Thursday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` : `Friday<br>${date.slice(3, 6)} ${date.slice(6, 8)}`
-  //     }</h5>
-  //   </section>`;
+    main.innerHTML += `
+    <section id=${date} class=${new Date() - d > 86400000 ? "past" :
+        new Date() - d < -86400000 ? "future" :
+          i + 1 < d.getDay() ? "past" :
+            i + 1 == d.getDay() ? "present" : "future"
+      }>
 
-  //   let div = document.getElementById(date);
-  //   hours.forEach(hour => {
-  //     let str = `${date}_${hour}`
-  //     let task = user.tasks?.find(({date})=> date==str)?.task || '';
-  //     let status = user.tasks?.find(({date})=> date==str)?.status || '';
+      <h5>${i == 0 ? `Monday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
+        i == 1 ? `Tuesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
+          i == 2 ? `Wednesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
+            i == 3 ? `Thursday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` : `Friday<br>${date.slice(3, 6)} ${date.slice(6, 8)}`
+      }</h5>
+    </section>`;
 
-  //     div.innerHTML +=
-  //       div.classList.contains("past") ?
-  //         `
-  //           <div>
-  //             <h5>${hour}</h5>
-  //             <input class="_${hour}" disabled value="${task}" />
-  //             <input class="_${hour}" disabled type="checkbox" ${status=="done"?"checked":""} />
-  //           </div>
-  //         ` :
-  //         div.classList.contains("future") ?
-  //           `
-  //           <div>
-  //             <h5>${hour}</h5>
-  //             <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
-  //             <input class="_${hour}" disabled type="checkbox" ${status=="done"?"checked":""} />
-  //           </div>
-  //        `:
-  //           `
-  //           <div>
-  //             <h5>${hour}</h5>
-  //             <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
-  //             <input class="_${hour}" onChange="handleChange('${date}_${hour}')" type="checkbox" ${status=="done"?"checked":""} />
-  //           </div>
-  //         `;
-  //         status=="done" 
-  //           ? div.querySelector(`._${hour}`).style.textDecoration = "line-through" 
-  //           : div.querySelector(`._${hour}`).style.textDecoration = "none";
-  //   });
-  // });
+    let div = document.getElementById(date);
+    hours.forEach(hour => {
+      let str = `${date}_${hour}`
+      let task = tasks?.find(({date})=> date==str)?.task || '';
+      let status = tasks?.find(({date})=> date==str)?.status || '';
+
+      div.innerHTML +=
+        div.classList.contains("past") ?
+          `
+            <div>
+              <h5>${hour}</h5>
+              <input class="_${hour}" disabled value="${task}" />
+              <input class="_${hour}" disabled type="checkbox" ${status=="done"?"checked":""} />
+            </div>
+          ` :
+          div.classList.contains("future") ?
+            `
+            <div>
+              <h5>${hour}</h5>
+              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
+              <input class="_${hour}" disabled type="checkbox" ${status=="done"?"checked":""} />
+            </div>
+         `:
+            `
+            <div>
+              <h5>${hour}</h5>
+              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
+              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" type="checkbox" ${status=="done"?"checked":""} />
+            </div>
+          `;
+          status=="done" 
+            ? div.querySelector(`._${hour}`).style.textDecoration = "line-through" 
+            : div.querySelector(`._${hour}`).style.textDecoration = "none";
+    });
+  });
 };
 
 const handleChange = async dayTime => {
@@ -173,16 +177,16 @@ const handleChange = async dayTime => {
       hour.style.textDecoration = "line-through"
     );
 
-  user.tasks = user.tasks.filter(obj => obj.date !== dayTime);
-  user.tasks.push({ date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" });
-  user.tasks = user.tasks.filter(obj => obj.task !== "");
+  tasks = tasks.filter(obj => obj.date !== dayTime);
+  tasks.push({ date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" });
+  tasks = tasks.filter(obj => obj.task !== "");
 
   await fetch('/api/data', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(user)
+    body: JSON.stringify(tasks)
   });
 
   init(d);
@@ -205,7 +209,7 @@ const renderPreviousWeek = () => {
   }, 1000);
 };
 
-const renderGauges = () => {  
+const renderGauges = () => {
 
   data = [
     {
@@ -284,13 +288,13 @@ const renderGauges = () => {
   Plotly.newPlot('chart2b', data2, layout);
 };
 
-  const getUser = async username => await (await fetch('/api/data', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ username })
-})).json();
+const getUser = async username => await (await fetch('/api/data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username })
+  })).json();
 
 init(d);
 today.onclick = renderToday;

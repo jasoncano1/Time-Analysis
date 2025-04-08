@@ -109,34 +109,32 @@ router.post('/login', async (req, res) => {
 router.post('/data', async (req, res) => {
   await connectToDb();
   const { username } = req.body;
-  pool.query('SELECT id FROM users WHERE username = ?', [username], async (err, result) => {
+
+  console.log('username: ', username);
+  
+  pool.query('SELECT id FROM users WHERE username = $1', [username], async (err,{ rows }) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error getting data.');
     };
 
-    if (result.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).send('User not found.');
     };
 
-    const userId = result[0].id;
-    pool.query('SELECT * FROM tasks WHERE user_id = ?', [userId], (err, result) => {
+    const userId = rows[0].id;
+    pool.query('SELECT * FROM tasks WHERE user_id = $1', [userId], (err, {rows}) => {
       if (err) {
         console.error(err);
         return res.status(500).send('Error getting data.');
       };
 
-      console.log('result: ', result);
-      
-
-      res.json(result);
+      console.log('rows: ', rows);
+      res.json(rows);
     });
   });
-  // Find the user by username
-  // const user = db.find(user => user.username === username);
-  // res.json(user);
+  
 });
-
 
 router.put('/data', (req, res) => {
   
