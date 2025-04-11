@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  username VARCHAR(50) NOT NULL,
+  username VARCHAR(50) UNIQUE NOT NULL,
   password VARCHAR(500) NOT NULL
 );
 
@@ -13,5 +13,7 @@ CREATE TABLE tasks (
   user_id INT NOT NULL,
   task VARCHAR(50),
   date VARCHAR(50) NOT NULL,
-  status VARCHAR(50) NOT NULL
+  status VARCHAR(50) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) 
+  ON DELETE CASCADE 
 );

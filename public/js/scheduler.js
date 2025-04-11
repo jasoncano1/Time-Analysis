@@ -1,4 +1,3 @@
-const { use } = require("../../routes/apiRoutes");
 
 let day;
 let hour;
@@ -40,7 +39,9 @@ const init = async d => {
   localStorage.getItem("username")
     ? (
       username = localStorage.getItem('username'),
-      document.getElementById('username').innerHTML = `Welcome ${username}`
+      document.getElementById('username').innerHTML = `Welcome ${username}`,
+      user_id = localStorage.getItem('user_id')
+      // localStorage.clear()
     )
     : (window.location.href = "/");
 
@@ -89,9 +90,6 @@ const renderNextWeek = () => {
 const populateWk = async d => {
   weekdays = getWkDays(d);
   tasks = tasks || await getUser(username);
-  user_id = tasks[0].user_id;
-  console.log('tasks: ', tasks);
-
   dateTimes = tasks.map(obj => obj.date);
 
   totalDone = 0;
@@ -168,7 +166,7 @@ const handleChange = async dayTime => {
   let [b, h] = dayTime.split("_");
   let day = document.getElementById(b);
   let hour = day.querySelector(`._${h}`);
-  let checkbox = day.querySelector(`._${h}[type=checkbox]`);
+  checkbox = day.querySelector(`._${h}[type=checkbox]`);
 
   checkbox.checked == false
     ? (
@@ -178,18 +176,19 @@ const handleChange = async dayTime => {
     );
 
   tasks = tasks.filter(obj => obj.date !== dayTime);
-  tasks.push({ date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" });
+  let newTask = { date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" };
+  tasks.push(newTask);
   tasks = tasks.filter(obj => obj.task !== "");
 
-  await fetch('/api/data', {
-    method: 'PUT',
+  await fetch(`/api/tasks/${user_id}`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(tasks)
+    body: JSON.stringify(newTask)
+  }).then(res => {
+    () => init(d);
   });
-
-  init(d);
 };
 
 const renderPreviousWeek = () => {

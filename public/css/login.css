@@ -3,7 +3,7 @@ body {
     background: #e2f3f5;
     background-image: url(../images/bg2.png);
     background-repeat: no-repeat;
-    background-size: cover;
+    background-size: 100% 100vh;
 }
 
 header {

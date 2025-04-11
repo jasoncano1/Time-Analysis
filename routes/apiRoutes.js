@@ -20,26 +20,23 @@ const {pool, connectToDb} = require('../db/connection'); // Import the connectio
 // POST route for signup
 router.post('/signup', async (req, res) => {
   const { username, password } = req.body;
-  // Check if the user already exists
-  const userExists = db.find(users=>users.username === username);
-  if (userExists) {
-    return res.status(400).send('User already exists.');
-  }
-  try {
-    // Hash the password with a salt round of 10
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // Store the new user
-    db.push({"username":username, password: hashedPassword, "tasks":[]});
-    
-    storeFx(db);
-    console.log('New user created:', username);
-    // Redirect to login page after successful signup
-    res.redirect('/workday');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error signing up.');
-  }
+  await connectToDb();
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  pool.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *;', [username, hashedPassword], (err, { rows }) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error signing up.');
+    };
+
+    const {id,username} = rows[0];
+    const newUser = { id, username };
+    console.log('New user created:', newUser);
+    res.json(newUser);
+  })
 });
+
 
 // POST route for login
 router.post('/login', async (req, res) => {
@@ -149,6 +146,20 @@ router.put('/data', (req, res) => {
       console.log('Data stored');
       res.json('success');
     }
+  });
+});
+
+router.post('/tasks/:user_id', (req, res) => {
+  const { user_id } = req.params;
+  const { date, task, status } = req.body;
+
+  pool.query('INSERT INTO tasks (user_id, date, task, status) VALUES ($1, $2, $3, $4)', [user_id, date, task, status], (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error saving task.');
+    };
+
+    res.json('Task saved successfully!');
   });
 });
 

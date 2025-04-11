@@ -22,15 +22,19 @@ btn.addEventListener("click",function(e){
         })
     }).then(res=>{
         if(res.status===200){
-
-            localStorage.setItem("username",username);
-            
-            username.value="";
-            password.value="";
-            confirmPassword.value="";
-
-            window.location.href="/workday";
-        }else{
+            res.json().then(({id,username})=>{
+                console.log("User created:",id,username);
+                
+                localStorage.setItem("user_id",id);
+                localStorage.setItem("username",username);
+                
+                username.value="";
+                password.value="";
+                confirmPassword.value="";
+                
+                window.location.href="/workday";
+            })
+            }else{
             res.json().then(data=>{
                 alert(data.message);
             })
