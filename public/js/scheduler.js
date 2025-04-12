@@ -176,11 +176,11 @@ const handleChange = async dayTime => {
     );
 
   tasks = tasks.filter(obj => obj.date !== dayTime);
-  let newTask = { date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" };
+  let newTask = { user_id, date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" };
   tasks.push(newTask);
   tasks = tasks.filter(obj => obj.task !== "");
 
-  await fetch(`/api/tasks/${user_id}`, {
+  await fetch(`/api/tasks`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
