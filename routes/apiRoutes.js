@@ -62,6 +62,8 @@ router.post('/login', async (req, res) => {
       if (match) {
         // If password is correct, login is successful
         // res.send(`Welcome, ${username}! You are now logged in.`);
+        console.log('User logged in:', user);
+        
         return res.json(user);
         // console.log('User logged in:', user);
       } else {
@@ -126,7 +128,6 @@ router.post('/data', async (req, res) => {
         return res.status(500).send('Error getting data.');
       };
 
-      console.log('rows: ', rows);
       res.json(rows);
     });
   });
@@ -152,6 +153,9 @@ router.put('/data', (req, res) => {
 router.post('/tasks', (req, res) => {
   const { user_id, date, task, status } = req.body;
 
+  console.log('body: ', req.body);
+  
+
   pool.query('SELECT id FROM tasks WHERE user_id = $1 AND date = $2', [user_id, date], (err, { rows }) => {
     if (err) {
       console.error(err);
@@ -162,7 +166,7 @@ router.post('/tasks', (req, res) => {
       // Task already exists, update it
       const id = rows[0].id;
 
-      if (task=='') {
+      if (task == '') {
         // If task is empty, delete it
         pool.query('DELETE FROM tasks WHERE id = $1', [id], (err, { rows }) => {
           if (err) {
@@ -170,35 +174,28 @@ router.post('/tasks', (req, res) => {
             return res.status(500).send('Error deleting task.');
           };
 
-          console.log('rows: ', rows);
+          res.json(rows[0]);
+        });
+      } else {
+        pool.query('UPDATE tasks SET task = $1, status = $2 WHERE id = $3', [task, status, id], (err, { rows }) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Error updating task.');
+          };
 
           res.json(rows[0]);
         });
-        return;
+
       }
-
-      pool.query('UPDATE tasks SET task = $1, status = $2 WHERE id = $3', [task, status, id], (err, { rows }) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).send('Error updating task.');
-        };
-
-        console.log('rows: ', rows);
-
-        res.json(rows[0]);
-      });
-
     } else {
       // Task does not exist, insert it
-      pool.query('INSERT INTO tasks (user_id, date, task, status) VALUES ($1, $2, $3, $4)', [user_id, date, task, status], (err, { rows }) => {
+      pool.query('INSERT INTO tasks (user_id, date, task, status) VALUES ($1, $2, $3, $4)', [user_id, date, task, status], (err, data) => {
         if (err) {
           console.error(err);
           return res.status(500).send('Error saving task.');
         };
 
-        console.log('rows: ', rows);
-
-        res.json(rows[0]);
+        res.json('testing');
       });
     }
 

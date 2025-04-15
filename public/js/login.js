@@ -16,11 +16,13 @@ btn.addEventListener("click",function(e){
         })
     }).then(res=>{
         if(res.status===200){
-
             username.value="";
             password.value="";
-            localStorage.setItem("username",username);
-            window.location.href="/workday";
+            res.json().then(user=>{
+                localStorage.setItem("user_id",user.id);
+                localStorage.setItem("username",username);
+                window.location.href="/workday";
+            });
         }else{
             res.json().then(data=>{
                 alert(data.message);

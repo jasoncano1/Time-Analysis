@@ -99,8 +99,6 @@ const populateWk = async d => {
   weekdays.forEach((date, i) => {
 
     dateTimes.forEach(dayTime => {
-      console.log('dayTime: ', dayTime, 'date: ', date);
-      
       if (dayTime.includes(date)) {
         totalScheduled += 1;
 
@@ -297,5 +295,11 @@ const getUser = async username => await (await fetch('/api/data', {
 
 init(d);
 today.onclick = renderToday;
+
+signOut.onclick = () => {
+  localStorage.clear();
+  window.location.href = "/";
+};
+
 nextWk.onclick = () => renderNextWeek(nextMonday);
 prevWk.onclick = () => renderPreviousWeek(nextMonday);
