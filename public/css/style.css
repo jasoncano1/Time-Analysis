@@ -59,7 +59,7 @@ header a {
   text-align: center;
 }
 
-#signOut {
+#signOut, #analysis {
   border: none;
   background: transparent;
   text-decoration: underline;
