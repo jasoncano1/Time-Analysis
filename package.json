@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Workday Scheduler",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "test": "nodemon server.js",
     "start": "node server.js"
@@ -19,7 +20,9 @@
   "homepage": "https://github.com/jasoncano1/Workday-Scheduler#readme",
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "express": "^4.21.2"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.14.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

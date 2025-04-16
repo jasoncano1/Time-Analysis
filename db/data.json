@@ -1,15 +1,5 @@
 [
   {
-    "username": "test3",
-    "password": "$2b$10$0ovOCAA0bpp8U/7VTHZdvebSwmCkVnHkKIVbl19HgdqTFqi9FOBbK",
-    "tasks": []
-  },
-  {
-    "username": "test",
-    "password": "$2b$10$ls0c8j/OndlUUzCbRKNze.xtjl6vRwN0Hh/ebhc970go1LI.sUVLq",
-    "tasks": []
-  },
-  {
     "username": "jasoncano1",
     "password": "$2b$10$WtcllE8laEH2AY9ai9h9cuO4M6Fk4GUgfFNvhjjh57b/EKAZmAwl6",
     "tasks": [

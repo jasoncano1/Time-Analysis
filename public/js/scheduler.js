@@ -1,12 +1,14 @@
+
 let day;
-let user;
 let hour;
 let data;
 let data2;
+let tasks;
 let layout;
 let monday;
 let friday;
 let layout2;
+let user_id;
 let tuesday;
 let weekdays;
 let thursday;
@@ -37,7 +39,9 @@ const init = async d => {
   localStorage.getItem("username")
     ? (
       username = localStorage.getItem('username'),
-      document.getElementById('username').innerHTML = `Welcome ${username}`
+      document.getElementById('username').innerHTML = `Welcome ${username}`,
+      user_id = localStorage.getItem('user_id')
+      // localStorage.clear()
     )
     : (window.location.href = "/");
 
@@ -85,8 +89,8 @@ const renderNextWeek = () => {
 
 const populateWk = async d => {
   weekdays = getWkDays(d);
-  user = user || await getUser(username);
-  dateTimes = user.tasks.map(obj => obj.date);
+  tasks = tasks || await getUser(username);
+  dateTimes = tasks.map(obj => obj.date);
 
   totalDone = 0;
   totalScheduled = 0;
@@ -95,11 +99,10 @@ const populateWk = async d => {
   weekdays.forEach((date, i) => {
 
     dateTimes.forEach(dayTime => {
-      
       if (dayTime.includes(date)) {
         totalScheduled += 1;
 
-        if (user.tasks.find(obj => obj.date == dayTime).status == "done") {
+        if (tasks.find(obj => obj.date == dayTime).status == "done") {
           totalDone += 1
         };
       };
@@ -111,7 +114,7 @@ const populateWk = async d => {
           i + 1 < d.getDay() ? "past" :
             i + 1 == d.getDay() ? "present" : "future"
       }>
-      
+
       <h5>${i == 0 ? `Monday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
         i == 1 ? `Tuesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
           i == 2 ? `Wednesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
@@ -122,8 +125,8 @@ const populateWk = async d => {
     let div = document.getElementById(date);
     hours.forEach(hour => {
       let str = `${date}_${hour}`
-      let task = user.tasks?.find(({date})=> date==str)?.task || '';
-      let status = user.tasks?.find(({date})=> date==str)?.status || '';
+      let task = tasks?.find(({date})=> date==str)?.task || '';
+      let status = tasks?.find(({date})=> date==str)?.status || '';
 
       div.innerHTML +=
         div.classList.contains("past") ?
@@ -161,7 +164,7 @@ const handleChange = async dayTime => {
   let [b, h] = dayTime.split("_");
   let day = document.getElementById(b);
   let hour = day.querySelector(`._${h}`);
-  let checkbox = day.querySelector(`._${h}[type=checkbox]`);
+  checkbox = day.querySelector(`._${h}[type=checkbox]`);
 
   checkbox.checked == false
     ? (
@@ -170,19 +173,20 @@ const handleChange = async dayTime => {
       hour.style.textDecoration = "line-through"
     );
 
-  user.tasks = user.tasks.filter(obj => obj.date !== dayTime);
-  user.tasks.push({ date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" });
-  user.tasks = user.tasks.filter(obj => obj.task !== "");
+  tasks = tasks.filter(obj => obj.date !== dayTime);
+  let newTask = { user_id, date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" };
+  tasks.push(newTask);
+  tasks = tasks.filter(obj => obj.task !== "");
 
-  await fetch('/api/data', {
-    method: 'PUT',
+  await fetch(`/api/tasks`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(user)
+    body: JSON.stringify(newTask)
+  }).then(res => {
+    () => init(d);
   });
-
-  init(d);
 };
 
 const renderPreviousWeek = () => {
@@ -202,10 +206,7 @@ const renderPreviousWeek = () => {
   }, 1000);
 };
 
-const renderGauges = () => {  
-
-  console.log("test: ",totalDone, totalScheduled, totalHours);
-  
+const renderGauges = () => {
 
   data = [
     {
@@ -284,15 +285,21 @@ const renderGauges = () => {
   Plotly.newPlot('chart2b', data2, layout);
 };
 
-  const getUser = async username => await (await fetch('/api/data', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ username })
-})).json();
+const getUser = async username => await (await fetch('/api/data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username })
+  })).json();
 
 init(d);
 today.onclick = renderToday;
+
+signOut.onclick = () => {
+  localStorage.clear();
+  window.location.href = "/";
+};
+
 nextWk.onclick = () => renderNextWeek(nextMonday);
 prevWk.onclick = () => renderPreviousWeek(nextMonday);
