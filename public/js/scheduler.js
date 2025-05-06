@@ -299,7 +299,7 @@ const analysisGraph = () => {
   var trace1 = {
     type: "scatter",
     mode: "lines",
-    x: unpack(rows, 'Date'),
+    x: tasks.map(obj=>obj.date.split('_')[0]),
     y: unpack(rows, 'AAPL.High'),
     line: {color: '#17BECF'}
   }
@@ -307,7 +307,7 @@ const analysisGraph = () => {
   var trace2 = {
     type: "scatter",
     mode: "lines",
-    x: unpack(rows, 'Date'),
+    x: tasks.map(obj=>obj.date.split('_')[0]),
     y: unpack(rows, 'AAPL.Low'),
     line: {color: '#7F7F7F'}
   }
