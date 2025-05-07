@@ -125,8 +125,8 @@ const populateWk = async d => {
     let div = document.getElementById(date);
     hours.forEach(hour => {
       let str = `${date}_${hour}`
-      let task = tasks?.find(({date})=> date==str)?.task || '';
-      let status = tasks?.find(({date})=> date==str)?.status || '';
+      let task = tasks?.find(({ date }) => date == str)?.task || '';
+      let status = tasks?.find(({ date }) => date == str)?.status || '';
 
       div.innerHTML +=
         div.classList.contains("past") ?
@@ -134,7 +134,7 @@ const populateWk = async d => {
             <div>
               <h5>${hour}</h5>
               <input class="_${hour}" disabled value="${task}" />
-              <input class="_${hour}" disabled type="checkbox" ${status=="done"?"checked":""} />
+              <input class="_${hour}" disabled type="checkbox" ${status == "done" ? "checked" : ""} />
             </div>
           ` :
           div.classList.contains("future") ?
@@ -142,19 +142,19 @@ const populateWk = async d => {
             <div>
               <h5>${hour}</h5>
               <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
-              <input class="_${hour}" disabled type="checkbox" ${status=="done"?"checked":""} />
+              <input class="_${hour}" disabled type="checkbox" ${status == "done" ? "checked" : ""} />
             </div>
          `:
             `
             <div>
               <h5>${hour}</h5>
               <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
-              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" type="checkbox" ${status=="done"?"checked":""} />
+              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" type="checkbox" ${status == "done" ? "checked" : ""} />
             </div>
           `;
-          status=="done" 
-            ? div.querySelector(`._${hour}`).style.textDecoration = "line-through" 
-            : div.querySelector(`._${hour}`).style.textDecoration = "none";
+      status == "done"
+        ? div.querySelector(`._${hour}`).style.textDecoration = "line-through"
+        : div.querySelector(`._${hour}`).style.textDecoration = "none";
     });
   });
 };
@@ -286,51 +286,65 @@ const renderGauges = () => {
 };
 
 const getUser = async username => await (await fetch('/api/data', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ username })
-  })).json();
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ username })
+})).json();
 
 const analysisGraph = () => {
-  main.innerHTML="";
+  main.innerHTML = "";
+
+  let y_tasks = {};
   
+  tasks.map(obj => {
+    let val = obj.date.split('_')[0];
+
+    if (!Object.keys(y_tasks).includes(val)) {
+      y_tasks[val] = [0,0];
+    };
+
+    y_tasks[val][0] = tasks.filter(obj=>obj.date.includes(val)).length;
+    y_tasks[val][1] = tasks.filter(obj=>obj.date.includes(val)).filter(obj=>obj.status=='done').length;
+  });
+
   var trace1 = {
     type: "scatter",
     mode: "lines",
-    x: tasks.map(obj=>obj.date.split('_')[0]),
-    y: unpack(rows, 'AAPL.High'),
-    line: {color: '#17BECF'}
+    name: 'Quality',
+    x: Object.keys(y_tasks),
+    y: Object.values(y_tasks).map(arr=>arr[0]),
+    line: { color: '#17BECF' }
   }
   
   var trace2 = {
     type: "scatter",
-    mode: "lines",
-    x: tasks.map(obj=>obj.date.split('_')[0]),
-    y: unpack(rows, 'AAPL.Low'),
-    line: {color: '#7F7F7F'}
+    mode: "bars",
+    name: 'Efficiency',
+    x:  Object.keys(y_tasks),
+    y: Object.values(y_tasks).map(arr=>arr[1]),
+    // line: { color: '#7F7F7F' }
   }
-  
-  var data = [trace1,trace2];
-  
+
+  var data = [trace1, trace2];
+
   var layout = {
     title: {
-      text: 'Custom Range'
+      text: 'Time Analysis'
     },
-    xaxis: {
-      range: ['2016-07-01', '2016-12-31'],
-      type: 'date'
-    },
-    yaxis: {
-      autorange: true,
-      range: [86.8700008333, 138.870004167],
-      type: 'linear'
-    }
+    // xaxis: {
+    //   range: Object.keys(y_tasks),
+    //   type: 'date'
+    // },
+    // yaxis: {
+    //   autorange: true,
+    //   range: [0, 10],
+    //   type: 'linear'
+    // }
   };
-  
-  Plotly.newPlot('main', data, layout);
-  
+
+  Plotly.newPlot('main', data)
 }
 
 init(d);
@@ -344,7 +358,7 @@ signOut.onclick = () => {
 analysis.onclick = () => {
   main.classList.toggle("slideLeftOut", true);
   setTimeout(() => {
-    
+
     main.innerHTML = "";
 
     var data = [
@@ -354,9 +368,9 @@ analysis.onclick = () => {
         type: 'scatter'
       }
     ];
-    
+
     Plotly.newPlot('main', data);
-    
+
   }, 500);
   setTimeout(() => {
     main.classList.toggle("slideLeftOut", false);
