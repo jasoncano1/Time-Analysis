@@ -310,21 +310,19 @@ const analysisGraph = () => {
   });
 
   var trace1 = {
-    type: "scatter",
     mode: "lines",
     name: 'Quality',
     x: Object.keys(y_tasks),
-    y: Object.values(y_tasks).map(arr=>arr[0]),
+    y: Object.values(y_tasks).map(arr=>arr[0]/9*100),
     line: { color: '#17BECF' }
   }
   
   var trace2 = {
-    type: "scatter",
     mode: "bars",
     name: 'Efficiency',
     x:  Object.keys(y_tasks),
-    y: Object.values(y_tasks).map(arr=>arr[1]),
-    // line: { color: '#7F7F7F' }
+    y: Object.values(y_tasks).map(arr=>arr[1]/9*100),
+    line: { color: '#7F7F7F' }
   }
 
   var data = [trace1, trace2];
@@ -333,18 +331,11 @@ const analysisGraph = () => {
     title: {
       text: 'Time Analysis'
     },
-    // xaxis: {
-    //   range: Object.keys(y_tasks),
-    //   type: 'date'
-    // },
-    // yaxis: {
-    //   autorange: true,
-    //   range: [0, 10],
-    //   type: 'linear'
-    // }
+    width: 600,
+    height: 300
   };
 
-  Plotly.newPlot('main', data)
+  Plotly.newPlot('main', data, layout)
 }
 
 init(d);
