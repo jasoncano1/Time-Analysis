@@ -298,11 +298,18 @@ const analysisGraph = () => {
     <div>
       <div id='control01'>
         <h2>Time Analysis</h2>
-        <select><option>0</option></select>
-        <select><option>0</option></select>
+        <select>
+          ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
+        </select>
+        <select>
+        ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
+        </select>
       </div>
       <div id = 'graph01'></div>
     </div>`;
+};
+
+const graphData = (start,end) => {
 
   let y_tasks = {};
   
