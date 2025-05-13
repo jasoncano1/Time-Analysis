@@ -294,7 +294,15 @@ const getUser = async username => await (await fetch('/api/data', {
 })).json();
 
 const analysisGraph = () => {
-  main.innerHTML = "";
+  main.innerHTML = `
+    <div>
+      <div id='control01'>
+        <h2>Time Analysis</h2>
+        <select><option>0</option></select>
+        <select><option>0</option></select>
+      </div>
+      <div id = 'graph01'></div>
+    </div>`;
 
   let y_tasks = {};
   
@@ -310,11 +318,11 @@ const analysisGraph = () => {
   });
 
   var trace1 = {
-    mode: "lines",
+    mode: "lines+markers",
     name: 'Quality',
     x: Object.keys(y_tasks),
     y: Object.values(y_tasks).map(arr=>arr[0]/9*100),
-    line: { color: '#17BECF' }
+    line: { color: 'red' }
   }
   
   var trace2 = {
@@ -322,20 +330,19 @@ const analysisGraph = () => {
     name: 'Efficiency',
     x:  Object.keys(y_tasks),
     y: Object.values(y_tasks).map(arr=>arr[1]/9*100),
-    line: { color: '#7F7F7F' }
+    line: { color: 'green' }
   }
 
   var data = [trace1, trace2];
 
   var layout = {
-    title: {
-      text: 'Time Analysis'
-    },
+    autosize: true,
+    margin: { l:75, r:50, t:20, b:130 },
     width: 600,
     height: 300
   };
 
-  Plotly.newPlot('main', data, layout)
+  Plotly.newPlot('graph01', data, layout)
 }
 
 init(d);

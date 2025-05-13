@@ -92,6 +92,12 @@ main {
   overflow: hidden;
 }
 
+#control01 {
+  background: white;
+  text-align: center;
+  padding-top: 3px;
+}
+
 .slideLeftOut {
   animation:nextWk 1s ease-in-out;
 }
