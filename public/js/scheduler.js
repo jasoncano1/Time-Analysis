@@ -1,20 +1,4 @@
 
-let day;
-let hour;
-let data;
-let data2;
-let tasks;
-let layout;
-let monday;
-let friday;
-let layout2;
-let user_id;
-let tuesday;
-let weekdays;
-let thursday;
-let checkbox;
-let username;
-let wednesday;
 let totalDone = 0;
 let d = new Date();
 let totalHours = 45;
@@ -25,6 +9,7 @@ const main = document.getElementById('main');
 const nextWk = document.getElementById('nextWeek');
 const prevWk = document.getElementById('prevWeek');
 const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
+let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, x_values, y_values1, y_values2, tuesday, weekdays, thursday,checkbox, username, wednesday;
 
 const getWkDays = d => {
   monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).toDateString().split(' ').join('');
@@ -293,66 +278,76 @@ const getUser = async username => await (await fetch('/api/data', {
   body: JSON.stringify({ username })
 })).json();
 
-const graphData = (start,end) => {
-
-  let y_tasks = {};
-  
-  tasks.map(obj => {
-    let val = obj.date.split('_')[0];
-
-    if (!Object.keys(y_tasks).includes(val)) {
-      y_tasks[val] = [0,0];
-    };
-
-    y_tasks[val][0] = tasks.filter(obj=>obj.date.includes(val)).length;
-    y_tasks[val][1] = tasks.filter(obj=>obj.date.includes(val)).filter(obj=>obj.status=='done').length;
-  });
-
+const graphData = (x,y1,y2) => {
+  graph01.innerHTML = '';
   var trace1 = {
     mode: "lines+markers",
     name: 'Quality',
-    x: Object.keys(y_tasks),
-    y: Object.values(y_tasks).map(arr=>arr[0]/9*100),
+    x: x,
+    y: y1,
     line: { color: 'red' }
-  }
+  };
   
   var trace2 = {
     mode: "bars",
     name: 'Efficiency',
-    x:  Object.keys(y_tasks),
-    y: Object.values(y_tasks).map(arr=>arr[1]/9*100),
+    x:  x,
+    y: y2,
     line: { color: 'green' }
-  }
-
+  };
   var data = [trace1, trace2];
-
   var layout = {
     autosize: true,
     margin: { l:75, r:50, t:20, b:130 },
     width: 600,
     height: 300
   };
-
   Plotly.newPlot('graph01', data, layout)
-}
+};
+
+const ch_start = ({value}) => {
+  
+  x_values = x_values.filter(d=>x_values.indexOf(d)>=x_values.indexOf(value));
+  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
+  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  end.innerHTML = '';
+  x_values.forEach(val=>{end.innerHTML+=`<option>${val}</option>`});
+  end.value = end.lastChild.innerHTML;
+  
+  graphData(x_values,y_values1,y_values2);
+};
 
 const analysisGraph = () => {
+  x_values = [... new Set(tasks.map(({date})=>date.split('_')[0]))];
   main.innerHTML = `
     <div>
       <div id='control01'>
         <h2>Time Analysis</h2>
-        <select onchage="graphData()">
-          ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
+        <select id="start" onchange="ch_start(this)">
+          ${x_values.map(date=>`<option> ${date}</option>`)}
         </select>
-        <select onchage="graphData()">
-        ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
+        <select id="end" onchange="ch_end(this)" value="${x_values[x_values.length-1]}">
+          ${x_values.map(date=>`<option> ${date}</option>`)}
         </select>
       </div>
       <div id = 'graph01'></div>
     </div>`;
 
-    graphData();
+  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
+  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  graphData(x_values,y_values1,y_values2);
 };
+
+const ch_end = ({value}) => {
+   
+  x_values = x_values.filter(d=>x_values.indexOf(d)<=x_values.indexOf(value));
+  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
+  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  end.innerHTML = '';
+  x_values.forEach(val=>{end.innerHTML+=`<option>${val}</option>`});
+  
+  graphData(x_values,y_values1,y_values2);
+}
 
 init(d);
 today.onclick = renderToday;
