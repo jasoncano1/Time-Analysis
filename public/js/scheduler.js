@@ -393,17 +393,17 @@ const analysisGraph = () => {
       <div id='control01'>
         <h2>Time Analysis</h2>
         <select id="startDate" onchange="updateDateRange()">
-          ${uniqueDates.map(date => `<option value="${date}">${date}</option>`).join('')}
+          ${uniqueDates.map((date, index) => `<option value="${date}" ${index === 0 ? 'selected' : ''}>${date}</option>`).join('')}
         </select>
         <select id="endDate" onchange="updateDateRange()">
-          ${uniqueDates.map(date => `<option value="${date}">${date}</option>`).join('')}
+          ${uniqueDates.map((date, index) => `<option value="${date}" ${index === uniqueDates.length - 1 ? 'selected' : ''}>${date}</option>`).join('')}
         </select>
       </div>
       <div id='graph01'></div>
     </div>`;
 
-  // Initialize with the full date range
-  updateDateRange();
+  // Initialize with the full date range (first date to last date)
+  graphData(uniqueDates[0], uniqueDates[uniqueDates.length - 1]);
 };
 
 init(d);
