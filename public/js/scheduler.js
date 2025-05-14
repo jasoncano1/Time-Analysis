@@ -293,22 +293,6 @@ const getUser = async username => await (await fetch('/api/data', {
   body: JSON.stringify({ username })
 })).json();
 
-const analysisGraph = () => {
-  main.innerHTML = `
-    <div>
-      <div id='control01'>
-        <h2>Time Analysis</h2>
-        <select>
-          ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
-        </select>
-        <select>
-        ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
-        </select>
-      </div>
-      <div id = 'graph01'></div>
-    </div>`;
-};
-
 const graphData = (start,end) => {
 
   let y_tasks = {};
@@ -351,6 +335,24 @@ const graphData = (start,end) => {
 
   Plotly.newPlot('graph01', data, layout)
 }
+
+const analysisGraph = () => {
+  main.innerHTML = `
+    <div>
+      <div id='control01'>
+        <h2>Time Analysis</h2>
+        <select onchage="graphData()">
+          ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
+        </select>
+        <select onchage="graphData()">
+        ${[... new Set(tasks.map(obj=>`<option> ${obj.date.split('_')[0]}</option>`))]}
+        </select>
+      </div>
+      <div id = 'graph01'></div>
+    </div>`;
+
+    graphData();
+};
 
 init(d);
 today.onclick = renderToday;
