@@ -292,33 +292,115 @@ const getUser = async username => await (await fetch('/api/data', {
   body: JSON.stringify({ username })
 })).json();
 
+// New function to handle frequency changes
+const updateFrequency = () => {
+  const frequencySelect = document.getElementById('frequencySelect');
+  const startSelect = document.getElementById('startDate');
+  const endSelect = document.getElementById('endDate');
+  const frequency = frequencySelect.value;
+  
+  const uniqueDates = [...new Set(tasks.map(obj => obj.date.split('_')[0]))].sort();
+  
+  let dateOptions = [];
+  
+  if (frequency === 'day') {
+    dateOptions = uniqueDates;
+  } else if (frequency === 'week') {
+    // Group by week - get unique week starts (Mondays)
+    const weekStarts = [];
+    uniqueDates.forEach(date => {
+      const d = new Date(date.slice(3, 6) + ' ' + date.slice(6, 8) + ', ' + '20' + date.slice(8, 10));
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1));
+      const weekKey = monday.toDateString().split(' ').join('');
+      if (!weekStarts.includes(weekKey)) {
+        weekStarts.push(weekKey);
+      }
+    });
+    dateOptions = weekStarts.sort();
+  } else if (frequency === 'month') {
+    // Group by month
+    const months = [];
+    uniqueDates.forEach(date => {
+      const monthKey = date.slice(3, 6) + date.slice(7, 10); // e.g., "Feb2025"
+      if (!months.includes(monthKey)) {
+        months.push(monthKey);
+      }
+    });
+    dateOptions = months.sort();
+  }
+  
+  // Update start date dropdown
+  startSelect.innerHTML = dateOptions.map((date, index) => 
+    `<option value="${date}" ${index === 0 ? 'selected' : ''}>${date}</option>`
+  ).join('');
+  
+  // Update end date dropdown
+  endSelect.innerHTML = dateOptions.map((date, index) => 
+    `<option value="${date}" ${index === dateOptions.length - 1 ? 'selected' : ''}>${date}</option>`
+  ).join('');
+  
+  // Update the graph with the new range
+  updateDateRange();
+};
+
 // Updated graphData function to accept date parameters
 const graphData = (start, end) => {
   let y_tasks = {};
+  const frequency = document.getElementById('frequencySelect')?.value || 'day';
   
   // Filter tasks based on date range if provided
   const filteredTasks = start && end ? 
     tasks.filter(obj => {
       const taskDate = obj.date.split('_')[0];
-      return taskDate >= start && taskDate <= end;
+      
+      if (frequency === 'day') {
+        return taskDate >= start && taskDate <= end;
+      } else if (frequency === 'week') {
+        const taskD = new Date(taskDate.slice(3, 6) + ' ' + taskDate.slice(6, 8) + ', ' + '20' + taskDate.slice(8, 10));
+        const startD = new Date(start.slice(3, 6) + ' ' + start.slice(6, 8) + ', ' + '20' + start.slice(8, 10));
+        const endD = new Date(end.slice(3, 6) + ' ' + end.slice(6, 8) + ', ' + '20' + end.slice(8, 10));
+        return taskD >= startD && taskD <= new Date(endD.getTime() + 7 * 24 * 60 * 60 * 1000);
+      } else { // month
+        const taskMonth = taskDate.slice(3, 6) + taskDate.slice(7, 10);
+        return taskMonth >= start && taskMonth <= end;
+      }
     }) : tasks;
   
+  // Group data based on frequency
   filteredTasks.map(obj => {
     let val = obj.date.split('_')[0];
-
-    if (!Object.keys(y_tasks).includes(val)) {
-      y_tasks[val] = [0, 0];
+    let key = val;
+    
+    if (frequency === 'week') {
+      const d = new Date(val.slice(3, 6) + ' ' + val.slice(6, 8) + ', ' + '20' + val.slice(8, 10));
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1));
+      key = monday.toDateString().split(' ').join('');
+    } else if (frequency === 'month') {
+      key = val.slice(3, 6) + val.slice(7, 10);
     }
 
-    y_tasks[val][0] = filteredTasks.filter(task => task.date.includes(val)).length;
-    y_tasks[val][1] = filteredTasks.filter(task => task.date.includes(val)).filter(task => task.status == 'done').length;
+    if (!Object.keys(y_tasks).includes(key)) {
+      y_tasks[key] = [0, 0];
+    }
+
+    y_tasks[key][0] += 1;
+    if (obj.status == 'done') {
+      y_tasks[key][1] += 1;
+    }
   });
+
+  // Calculate appropriate divisor based on frequency
+  let divisor = 9; // hours per day
+  if (frequency === 'week') divisor = 45; // hours per week
+  if (frequency === 'month') divisor = 180; // approximate hours per month
 
   var trace1 = {
     mode: "lines+markers",
     name: 'Quality',
     x: Object.keys(y_tasks),
-    y: Object.values(y_tasks).map(arr => arr[0] / 9 * 100),
+    y: Object.values(y_tasks).map(arr => arr[0] / divisor * 100),
     line: { color: 'red' }
   };
   
@@ -326,7 +408,7 @@ const graphData = (start, end) => {
     mode: "bars",
     name: 'Efficiency',
     x: Object.keys(y_tasks),
-    y: Object.values(y_tasks).map(arr => arr[1] / 9 * 100),
+    y: Object.values(y_tasks).map(arr => arr[1] / divisor * 100),
     line: { color: 'green' }
   };
 
@@ -392,6 +474,11 @@ const analysisGraph = () => {
     <div>
       <div id='control01'>
         <h2>Time Analysis</h2>
+        <select id="frequencySelect" onchange="updateFrequency()">
+          <option value="day" selected>Day</option>
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+        </select>
         <select id="startDate" onchange="updateDateRange()">
           ${uniqueDates.map((date, index) => `<option value="${date}" ${index === 0 ? 'selected' : ''}>${date}</option>`).join('')}
         </select>
