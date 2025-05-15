@@ -305,6 +305,24 @@ const graphData = (x,y1,y2) => {
   Plotly.newPlot('graph01', data, layout)
 };
 
+const ch_frequency = ({value}) => {
+
+  x_values = value == 'day' 
+  ? [... new Set(tasks.map(({date})=>date.split('_')[0]))] 
+  : x_values.map(date => date.substr(3,3)+date.substr(8,4));
+  
+  start.innerHTML = '';
+  end.innerHTML = '';
+
+  x_values.map(date => {
+    start.innerHTML += `<option>${date}</option>`;
+    end.innerHTML += `<option>${date}</option>`;
+  });
+
+  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
+  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  
+}
 const ch_start = ({value}) => {
   
   x_values = x_values.filter(d=>x_values.indexOf(d)>=x_values.indexOf(value));
@@ -323,6 +341,10 @@ const analysisGraph = () => {
     <div>
       <div id='control01'>
         <h2>Time Analysis</h2>
+        <select id="frequency" onchange="ch_frequency(this)">
+          <option>day</option>
+          <option>month</option>
+        </select>
         <select id="start" onchange="ch_start(this)">
           ${x_values.map(date=>`<option> ${date}</option>`)}
         </select>
