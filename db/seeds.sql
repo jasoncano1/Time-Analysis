@@ -113,8 +113,8 @@ INSERT INTO tasks (user_id, task, date, status) VALUES
 -- 2025-03-07 (Fri, Mar 07, 2025)
 INSERT INTO tasks (user_id, task, date, status) VALUES
   (1, 'Coding Development', 'FriMar072025_9AM', 'done'),
-  (1, 'Self Coding', 'FriMar072025_9AM', 'done'),
-  (1, 'Self Coding', 'FriMar072025_9AM', 'done'),
+  (1, 'Self Coding', 'FriMar072025_10AM', 'done'),
+  (1, 'Self Coding', 'FriMar072025_11AM', 'done'),
   (1, 'Lunch', 'FriMar072025_12PM', 'done');
 
 -- 2025-03-13 (Thu, Mar 13, 2025)
