@@ -319,15 +319,15 @@ const ch_frequency = ({value}) => {
     end.innerHTML += `<option>${date}</option>`;
   });
 
-  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
-  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d)).length/9*100));
+  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d) & status == 'done').length/9*100));
   
 }
 const ch_start = ({value}) => {
   
   x_values = x_values.filter(d=>x_values.indexOf(d)>=x_values.indexOf(value));
-  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
-  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d.substr(0,3)) & date.includes(d.substr(3))).length/9*100));
+  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d.substr(0,3)) & date.includes(d.substr(3)) & status == 'done').length/9*100));
   end.innerHTML = '';
   x_values.forEach(val=>{end.innerHTML+=`<option>${val}</option>`});
   end.value = end.lastChild.innerHTML;
@@ -355,16 +355,16 @@ const analysisGraph = () => {
       <div id = 'graph01'></div>
     </div>`;
 
-  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
-  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d)).length/9*100));
+  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d) & status == 'done').length/9*100));
   graphData(x_values,y_values1,y_values2);
 };
 
 const ch_end = ({value}) => {
    
   x_values = x_values.filter(d=>x_values.indexOf(d)<=x_values.indexOf(value));
-  y_values1 = x_values.map(d=>tasks.filter(({date})=>date.includes(d)).length);
-  y_values2 = x_values.map(d=>tasks.filter(({date,status})=>date.includes(d) & status == 'done').length);
+  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d)).length/9*100));
+  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d) & status == 'done').length/9*100));
   end.innerHTML = '';
   x_values.forEach(val=>{end.innerHTML+=`<option>${val}</option>`});
   
