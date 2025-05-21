@@ -82,6 +82,8 @@ const populateWk = async d => {
   main.innerHTML = '';
 
   weekdays.forEach((date, i) => {
+    console.log('date: ',date);
+    
 
     dateTimes.forEach(dayTime => {
       if (dayTime.includes(date)) {
