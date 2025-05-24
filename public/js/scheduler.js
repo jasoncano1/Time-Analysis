@@ -12,11 +12,11 @@ const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"]
 let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, x_values, y_values1, y_values2, tuesday, weekdays, thursday,checkbox, username, wednesday;
 
 const getWkDays = d => {
-  monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).toDateString().split(' ').join('');
-  tuesday = new Date(d.getDay != 1 ? d - (d.getDay() - 2) * 86400000 : d).toDateString().split(' ').join('');
-  wednesday = new Date(d.getDay != 1 ? d - (d.getDay() - 3) * 86400000 : d).toDateString().split(' ').join('');
-  thursday = new Date(d.getDay != 1 ? d - (d.getDay() - 4) * 86400000 : d).toDateString().split(' ').join('');
-  friday = new Date(d.getDay != 1 ? d - (d.getDay() - 5) * 86400000 : d).toDateString().split(' ').join('');
+  monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).getTime();
+  tuesday = new Date(d.getDay != 1 ? d - (d.getDay() - 2) * 86400000 : d).getTime();
+  wednesday = new Date(d.getDay != 1 ? d - (d.getDay() - 3) * 86400000 : d).getTime();
+  thursday = new Date(d.getDay != 1 ? d - (d.getDay() - 4) * 86400000 : d).getTime();
+  friday = new Date(d.getDay != 1 ? d - (d.getDay() - 5) * 86400000 : d).getTime();
   return [monday, tuesday, wednesday, thursday, friday];
 };
 
@@ -102,10 +102,12 @@ const populateWk = async d => {
             i + 1 == d.getDay() ? "present" : "future"
       }>
 
-      <h5>${i == 0 ? `Monday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
-        i == 1 ? `Tuesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
-          i == 2 ? `Wednesday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` :
-            i == 3 ? `Thursday<br>${date.slice(3, 6)} ${date.slice(6, 8)}` : `Friday<br>${date.slice(3, 6)} ${date.slice(6, 8)}`
+      <h5>${
+        i == 0 ? `Monday<br>${new Date(date).toDateString().slice(4,10)}` :
+        i == 1 ? `Tuesday<br>${new Date(date).toDateString().slice(4,10)}` :
+        i == 2 ? `Wednesday<br>${new Date(date).toDateString().slice(4,10)}` :
+        i == 3 ? `Thursday<br>${new Date(date).toDateString().slice(4,10)}` : 
+                 `Friday<br>${new Date(date).toDateString().slice(4,10)}`
       }</h5>
     </section>`;
 
