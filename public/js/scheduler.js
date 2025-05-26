@@ -82,8 +82,6 @@ const populateWk = async d => {
   main.innerHTML = '';
 
   weekdays.forEach((date, i) => {
-    console.log('date: ',date);
-    
 
     dateTimes.forEach(dayTime => {
       if (dayTime.includes(date)) {
@@ -112,8 +110,10 @@ const populateWk = async d => {
     </section>`;
 
     let div = document.getElementById(date);
-    hours.forEach(hour => {
-      let str = `${date}_${hour}`
+    hours.forEach((hour,i) => {
+      let h = i+9;
+      let d2 = new Date(date).toLocaleDateString();
+      let str = new Date(`${d2} ${h}:00`).getTime();
       let task = tasks?.find(({ date }) => date == str)?.task || '';
       let status = tasks?.find(({ date }) => date == str)?.status || '';
 
