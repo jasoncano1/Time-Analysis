@@ -84,9 +84,13 @@ const populateWk = async d => {
   weekdays.forEach((date, i) => {
 
     dateTimes.forEach(dayTime => {
-      if (dayTime.includes(date)) {
+      let dTime = new Date(parseInt(dayTime)).toLocaleDateString();
+      let dDate = new Date(date).toLocaleDateString();
+      
+      if (dTime == dDate) {
         totalScheduled += 1;
-
+        console.log(dayTime);
+        
         if (tasks.find(obj => obj.date == dayTime).status == "done") {
           totalDone += 1
         };
