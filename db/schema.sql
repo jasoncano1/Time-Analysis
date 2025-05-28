@@ -12,7 +12,7 @@ CREATE TABLE tasks (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL,
   task VARCHAR(50),
-  date VARCHAR(50) NOT NULL,
+  date BIGINT NOT NULL,
   status VARCHAR(50) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) 
   ON DELETE CASCADE 
