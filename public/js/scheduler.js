@@ -12,11 +12,11 @@ const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"]
 let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, x_values, y_values1, y_values2, tuesday, weekdays, thursday,checkbox, username, wednesday;
 
 const getWkDays = d => {
-  monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).getTime();
-  tuesday = new Date(d.getDay != 1 ? d - (d.getDay() - 2) * 86400000 : d).getTime();
-  wednesday = new Date(d.getDay != 1 ? d - (d.getDay() - 3) * 86400000 : d).getTime();
-  thursday = new Date(d.getDay != 1 ? d - (d.getDay() - 4) * 86400000 : d).getTime();
-  friday = new Date(d.getDay != 1 ? d - (d.getDay() - 5) * 86400000 : d).getTime();
+  monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).toLocaleDateString();
+  tuesday = new Date(d.getDay != 1 ? d - (d.getDay() - 2) * 86400000 : d).toLocaleDateString();
+  wednesday = new Date(d.getDay != 1 ? d - (d.getDay() - 3) * 86400000 : d).toLocaleDateString();
+  thursday = new Date(d.getDay != 1 ? d - (d.getDay() - 4) * 86400000 : d).toLocaleDateString();
+  friday = new Date(d.getDay != 1 ? d - (d.getDay() - 5) * 86400000 : d).toLocaleDateString();
   return [monday, tuesday, wednesday, thursday, friday];
 };
 
@@ -85,11 +85,9 @@ const populateWk = async d => {
 
     dateTimes.forEach(dayTime => {
       let dTime = new Date(parseInt(dayTime)).toLocaleDateString();
-      let dDate = new Date(date).toLocaleDateString();
       
-      if (dTime == dDate) {
+      if (dTime == date) {
         totalScheduled += 1;
-        console.log(dayTime);
         
         if (tasks.find(obj => obj.date == dayTime).status == "done") {
           totalDone += 1
@@ -134,15 +132,15 @@ const populateWk = async d => {
             `
             <div>
               <h5>${hour}</h5>
-              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
+              <input class="_${hour}" onChange="handleChange('${date} ${hour}')" value="${task}" />
               <input class="_${hour}" disabled type="checkbox" ${status == "done" ? "checked" : ""} />
             </div>
          `:
             `
             <div>
               <h5>${hour}</h5>
-              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" value="${task}" />
-              <input class="_${hour}" onChange="handleChange('${date}_${hour}')" type="checkbox" ${status == "done" ? "checked" : ""} />
+              <input class="_${hour}" onChange="handleChange('${date} ${hour}')" value="${task}" />
+              <input class="_${hour}" onChange="handleChange('${date} ${hour}')" type="checkbox" ${status == "done" ? "checked" : ""} />
             </div>
           `;
       status == "done"
@@ -153,9 +151,8 @@ const populateWk = async d => {
 };
 
 const handleChange = async dayTime => {
-
-  let [b, h] = dayTime.split("_");
-  let day = document.getElementById(b);
+  let [d, h] = dayTime.split(' ');
+  let day = document.getElementById(d);
   let hour = day.querySelector(`._${h}`);
   checkbox = day.querySelector(`._${h}[type=checkbox]`);
 
