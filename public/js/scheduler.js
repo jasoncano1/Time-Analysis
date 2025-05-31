@@ -119,6 +119,9 @@ const populateWk = async d => {
       let task = tasks?.find(({ date }) => date == str)?.task || '';
       let status = tasks?.find(({ date }) => date == str)?.status || '';
 
+      console.log('task: ',task, ' ',d2, ' ',h);
+
+
       div.innerHTML +=
         div.classList.contains("past") ?
           `

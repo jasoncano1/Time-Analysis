@@ -118,7 +118,7 @@ const populateWk = async d => {
       let d2 = new Date(date).toLocaleDateString();
       let str = new Date(`${d2} ${h}:00`).getTime();
       let task = tasks?.find(({ date }) => date == str)?.task || '';
-      let status = tasks?.find(({ date }) => date == str)?.status || '';
+      let status = tasks?.find(({ date }) => date == str)?.status || '';      
 
       div.innerHTML +=
         div.classList.contains("past") ?
