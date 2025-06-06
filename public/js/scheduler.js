@@ -84,6 +84,8 @@ const populateWk = async d => {
   weekdays.forEach((date, i) => {
 
     dateTimes.forEach(dayTime => {
+
+      
       let dTime = new Date(parseInt(dayTime)).toLocaleDateString();
       
       if (dTime == date) {
@@ -151,6 +153,7 @@ const populateWk = async d => {
 };
 
 const handleChange = async dayTime => {
+
   let [d, h] = dayTime.split(' ');
   let day = document.getElementById(d);
   let hour = day.querySelector(`._${h}`);
@@ -164,7 +167,10 @@ const handleChange = async dayTime => {
     );
 
   tasks = tasks.filter(obj => obj.date !== dayTime);
-  let newTask = { user_id, date: dayTime, task: hour.value, status: checkbox.checked ? "done" : "pending" };
+  
+  let ms = new Date(dayTime.substr(0,dayTime.length-2)+ ':00 ' + dayTime.substr(dayTime.length-2)).getTime();
+
+  let newTask = { user_id, date: ms, task: hour.value, status: checkbox.checked ? "done" : "pending" };
   tasks.push(newTask);
   tasks = tasks.filter(obj => obj.task !== "");
 
