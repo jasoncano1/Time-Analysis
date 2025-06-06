@@ -9,7 +9,7 @@ const main = document.getElementById('main');
 const nextWk = document.getElementById('nextWeek');
 const prevWk = document.getElementById('prevWeek');
 const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
-let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, x_values, y_values1, y_values2, tuesday, weekdays, thursday,checkbox, username, wednesday;
+let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, x_values, y_values1, y_values2, tuesday, weekdays, thursday, checkbox, username, wednesday;
 
 const getWkDays = d => {
   monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).toLocaleDateString();
@@ -85,12 +85,12 @@ const populateWk = async d => {
 
     dateTimes.forEach(dayTime => {
 
-      
+
       let dTime = new Date(parseInt(dayTime)).toLocaleDateString();
-      
+
       if (dTime == date) {
         totalScheduled += 1;
-        
+
         if (tasks.find(obj => obj.date == dayTime).status == "done") {
           totalDone += 1
         };
@@ -104,18 +104,17 @@ const populateWk = async d => {
             i + 1 == d.getDay() ? "present" : "future"
       }>
 
-      <h5>${
-        i == 0 ? `Monday<br>${new Date(date).toDateString().slice(4,10)}` :
-        i == 1 ? `Tuesday<br>${new Date(date).toDateString().slice(4,10)}` :
-        i == 2 ? `Wednesday<br>${new Date(date).toDateString().slice(4,10)}` :
-        i == 3 ? `Thursday<br>${new Date(date).toDateString().slice(4,10)}` : 
-                 `Friday<br>${new Date(date).toDateString().slice(4,10)}`
+      <h5>${i == 0 ? `Monday<br>${new Date(date).toDateString().slice(4, 10)}` :
+        i == 1 ? `Tuesday<br>${new Date(date).toDateString().slice(4, 10)}` :
+          i == 2 ? `Wednesday<br>${new Date(date).toDateString().slice(4, 10)}` :
+            i == 3 ? `Thursday<br>${new Date(date).toDateString().slice(4, 10)}` :
+              `Friday<br>${new Date(date).toDateString().slice(4, 10)}`
       }</h5>
     </section>`;
 
     let div = document.getElementById(date);
-    hours.forEach((hour,i) => {
-      let h = i+9;
+    hours.forEach((hour, i) => {
+      let h = i + 9;
       let d2 = new Date(date).toLocaleDateString();
       let str = new Date(`${d2} ${h}:00`).getTime();
       let task = tasks?.find(({ date }) => date == str)?.task || '';
@@ -167,8 +166,8 @@ const handleChange = async dayTime => {
     );
 
   tasks = tasks.filter(obj => obj.date !== dayTime);
-  
-  let ms = new Date(dayTime.substr(0,dayTime.length-2)+ ':00 ' + dayTime.substr(dayTime.length-2)).getTime();
+
+  let ms = new Date(dayTime.substr(0, dayTime.length - 2) + ':00 ' + dayTime.substr(dayTime.length - 2)).getTime();
 
   let newTask = { user_id, date: ms, task: hour.value, status: checkbox.checked ? "done" : "pending" };
   tasks.push(newTask);
@@ -289,7 +288,7 @@ const getUser = async username => await (await fetch('/api/data', {
   body: JSON.stringify({ username })
 })).json();
 
-const graphData = (x,y1,y2) => {
+const graphData = (x, y1, y2) => {
   graph01.innerHTML = '';
   var trace1 = {
     mode: "lines+markers",
@@ -298,30 +297,30 @@ const graphData = (x,y1,y2) => {
     y: y1,
     line: { color: 'red' }
   };
-  
+
   var trace2 = {
     mode: "bars",
     name: 'Efficiency',
-    x:  x,
+    x: x,
     y: y2,
     line: { color: 'green' }
   };
   var data = [trace1, trace2];
   var layout = {
     autosize: true,
-    margin: { l:75, r:50, t:20, b:130 },
+    margin: { l: 75, r: 50, t: 20, b: 130 },
     width: 600,
     height: 300
   };
   Plotly.newPlot('graph01', data, layout)
 };
 
-const ch_frequency = ({value}) => {
+const ch_frequency = ({ value }) => {
 
-  x_values = value == 'day' 
-  ? [... new Set(tasks.map(({date})=>date.split('_')[0]))] 
-  : x_values.map(date => date.substr(3,3)+date.substr(8,4));
-  
+  x_values = value == 'day'
+    ? [... new Set(tasks.map(({ date }) => date.split('_')[0]))]
+    : x_values.map(date => date.substr(3, 3) + date.substr(8, 4));
+
   start.innerHTML = '';
   end.innerHTML = '';
 
@@ -330,25 +329,30 @@ const ch_frequency = ({value}) => {
     end.innerHTML += `<option>${date}</option>`;
   });
 
-  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d)).length/9*100));
-  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d) & status == 'done').length/9*100));
-  
+  y_values1 = x_values.map(d => parseInt(tasks.filter(({ date }) => date.includes(d)).length / 9 * 100));
+  y_values2 = x_values.map(d => parseInt(tasks.filter(({ date, status }) => date.includes(d) & status == 'done').length / 9 * 100));
+
 }
-const ch_start = ({value}) => {
-  
-  x_values = x_values.filter(d=>x_values.indexOf(d)>=x_values.indexOf(value));
-  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d.substr(0,3)) & date.includes(d.substr(3))).length/9*100));
-  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d.substr(0,3)) & date.includes(d.substr(3)) & status == 'done').length/9*100));
+const ch_start = ({ value }) => {
+
+  x_values = x_values.filter(d => x_values.indexOf(d) >= x_values.indexOf(value));
+  y_values1 = x_values.map(d => parseInt(tasks.filter(({ date }) => date.includes(d.substr(0, 3)) & date.includes(d.substr(3))).length / 9 * 100));
+  y_values2 = x_values.map(d => parseInt(tasks.filter(({ date, status }) => date.includes(d.substr(0, 3)) & date.includes(d.substr(3)) & status == 'done').length / 9 * 100));
   end.innerHTML = '';
-  x_values.forEach(val=>{end.innerHTML+=`<option>${val}</option>`});
+  x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
   end.value = end.lastChild.innerHTML;
-  
-  graphData(x_values,y_values1,y_values2);
+
+  graphData(x_values, y_values1, y_values2);
 };
 
 const analysisGraph = () => {
-  x_values = [... new Set(tasks.map(({date})=>date.split('_')[0]))];
-  main.innerHTML = `
+  x_values = [... new Set(tasks.map(({ date }) => new Date(parseInt(date)).toLocaleDateString()))];
+
+  main.classList.toggle("slideLeftOut", true);
+
+  setTimeout(() => {
+
+    main.innerHTML = `
     <div>
       <div id='control01'>
         <h2>Time Analysis</h2>
@@ -357,29 +361,35 @@ const analysisGraph = () => {
           <option>month</option>
         </select>
         <select id="start" onchange="ch_start(this)">
-          ${x_values.map(date=>`<option> ${date}</option>`)}
+          ${x_values.map(date => `<option> ${date}</option>`)}
         </select>
-        <select id="end" onchange="ch_end(this)" value="${x_values[x_values.length-1]}">
-          ${x_values.map(date=>`<option> ${date}</option>`)}
+        <select id="end" onchange="ch_end(this)" value="${x_values[x_values.length - 1]}">
+          ${x_values.map(date => `<option> ${date}</option>`)}
         </select>
       </div>
       <div id = 'graph01'></div>
     </div>`;
 
-  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d)).length/9*100));
-  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d) & status == 'done').length/9*100));
-  graphData(x_values,y_values1,y_values2);
+    y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
+    y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
+    graphData(x_values, y_values1, y_values2);
+
+  }, 500);
+
+  setTimeout(() => {
+    main.classList.toggle("slideLeftOut", false);
+  }, 1000);
 };
 
-const ch_end = ({value}) => {
-   
-  x_values = x_values.filter(d=>x_values.indexOf(d)<=x_values.indexOf(value));
-  y_values1 = x_values.map(d=>parseInt(tasks.filter(({date})=>date.includes(d)).length/9*100));
-  y_values2 = x_values.map(d=>parseInt(tasks.filter(({date,status})=>date.includes(d) & status == 'done').length/9*100));
+const ch_end = ({ value }) => {
+
+  x_values = x_values.filter(d => x_values.indexOf(d) <= x_values.indexOf(value));
+  y_values1 = x_values.map(d => parseInt(tasks.filter(({ date }) => date.includes(d)).length / 9 * 100));
+  y_values2 = x_values.map(d => parseInt(tasks.filter(({ date, status }) => date.includes(d) & status == 'done').length / 9 * 100));
   end.innerHTML = '';
-  x_values.forEach(val=>{end.innerHTML+=`<option>${val}</option>`});
-  
-  graphData(x_values,y_values1,y_values2);
+  x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
+
+  graphData(x_values, y_values1, y_values2);
 }
 
 init(d);
@@ -390,27 +400,27 @@ signOut.onclick = () => {
   window.location.href = "/";
 };
 
-analysis.onclick = () => {
-  main.classList.toggle("slideLeftOut", true);
-  setTimeout(() => {
+// analysis.onclick = () => {
+//   main.classList.toggle("slideLeftOut", true);
+//   setTimeout(() => {
 
-    main.innerHTML = "";
+//     main.innerHTML = "";
 
-    var data = [
-      {
-        x: ['2013-10-04 22:23:00', '2013-11-04 22:23:00', '2013-12-04 22:23:00'],
-        y: [1, 3, 6],
-        type: 'scatter'
-      }
-    ];
+//     var data = [
+//       {
+//         x: ['2013-10-04 22:23:00', '2013-11-04 22:23:00', '2013-12-04 22:23:00'],
+//         y: [1, 3, 6],
+//         type: 'scatter'
+//       }
+//     ];
 
-    Plotly.newPlot('main', data);
+//     Plotly.newPlot('main', data);
 
-  }, 500);
-  setTimeout(() => {
-    main.classList.toggle("slideLeftOut", false);
-  }, 1000);
-}
+//   }, 500);
+//   setTimeout(() => {
+//     main.classList.toggle("slideLeftOut", false);
+//   }, 1000);
+// }
 
 nextWk.onclick = () => renderNextWeek(nextMonday);
 prevWk.onclick = () => renderPreviousWeek(nextMonday);
