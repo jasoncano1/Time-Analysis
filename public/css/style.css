@@ -92,6 +92,10 @@ main {
   overflow: hidden;
 }
 
+#analysisDiv {
+  margin: 0 auto;
+}
+
 #control01 {
   background: white;
   text-align: center;

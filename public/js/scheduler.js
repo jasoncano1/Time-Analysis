@@ -276,7 +276,6 @@ const renderGauges = () => {
     }
   ];
 
-  layout = { width: 350, height: 80, paper_bgcolor: 'transparent', margin: { t: 10, b: 40, l: 120, r: 60 } };
   Plotly.newPlot('chart2b', data2, layout);
 };
 
@@ -346,14 +345,14 @@ const ch_start = ({ value }) => {
 };
 
 const analysisGraph = () => {
-  x_values = [... new Set(tasks.map(({ date }) => new Date(parseInt(date)).toLocaleDateString()))];
+  x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))]
 
   main.classList.toggle("slideLeftOut", true);
 
   setTimeout(() => {
 
     main.innerHTML = `
-    <div>
+    <div id="analysisDiv">
       <div id='control01'>
         <h2>Time Analysis</h2>
         <select id="frequency" onchange="ch_frequency(this)">
@@ -374,6 +373,10 @@ const analysisGraph = () => {
     y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
     graphData(x_values, y_values1, y_values2);
 
+    totalHours = x_values.length;
+    totalDone = y_values2.length;
+    totalScheduled = y_values1.length;
+    renderGauges();
   }, 500);
 
   setTimeout(() => {
