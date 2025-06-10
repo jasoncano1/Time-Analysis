@@ -316,9 +316,19 @@ const graphData = (x, y1, y2) => {
 
 const ch_frequency = ({ value }) => {
 
-  x_values = value == 'day'
-    ? [... new Set(tasks.map(({ date }) => date.split('_')[0]))]
-    : x_values.map(date => date.substr(3, 3) + date.substr(8, 4));
+  
+  if (value == 'day') {
+    
+    x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
+    filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
+    y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
+    y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
+    
+  } else if (value == 'week') {
+    
+    x_values = [...new Set(tasks.map(obj=>new Date(parseInt(obj.date)).toLocaleDateString()))].map((_,i)=>Math.floor((i+1)/5)+1);
+  }
+  x_values.map(date => date.substr(3, 3) + date.substr(8, 4));
 
   start.innerHTML = '';
   end.innerHTML = '';
@@ -326,10 +336,9 @@ const ch_frequency = ({ value }) => {
   x_values.map(date => {
     start.innerHTML += `<option>${date}</option>`;
     end.innerHTML += `<option>${date}</option>`;
+    end.value = end.lastChild.value;
   });
 
-  y_values1 = x_values.map(d => parseInt(tasks.filter(({ date }) => date.includes(d)).length / 9 * 100));
-  y_values2 = x_values.map(d => parseInt(tasks.filter(({ date, status }) => date.includes(d) & status == 'done').length / 9 * 100));
 
 }
 const ch_start = ({ value }) => {
@@ -367,6 +376,7 @@ const analysisGraph = () => {
         <h2>Time Analysis</h2>
         <select id="frequency" onchange="ch_frequency(this)">
           <option>day</option>
+          <option>week</option>
           <option>month</option>
         </select>
         <select id="start" onchange="ch_start(this)">
@@ -403,10 +413,10 @@ const analysisGraph = () => {
 
 const ch_end = ({ value }) => {
 
-  x_values = x_values.filter(d => x_values.indexOf(d) <= x_values.indexOf(value));
-  filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
-  y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
-  y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
+  let x_values2 = x_values.filter(d => x_values.indexOf(d) <= x_values.indexOf(value));
+  filterData = x_values2.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
+  y_values1 = x_values2.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
+  y_values2 = x_values2.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
 
   totalDone = 0;
   totalScheduled = 0;
@@ -418,7 +428,7 @@ const ch_end = ({ value }) => {
   renderGauges();
   end.innerHTML = '';
   x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
-  end.value = end.lastChild.innerHTML;
+  end.value = value;
 
   graphData(x_values, y_values1, y_values2);
 }
@@ -430,28 +440,6 @@ signOut.onclick = () => {
   localStorage.clear();
   window.location.href = "/";
 };
-
-// analysis.onclick = () => {
-//   main.classList.toggle("slideLeftOut", true);
-//   setTimeout(() => {
-
-//     main.innerHTML = "";
-
-//     var data = [
-//       {
-//         x: ['2013-10-04 22:23:00', '2013-11-04 22:23:00', '2013-12-04 22:23:00'],
-//         y: [1, 3, 6],
-//         type: 'scatter'
-//       }
-//     ];
-
-//     Plotly.newPlot('main', data);
-
-//   }, 500);
-//   setTimeout(() => {
-//     main.classList.toggle("slideLeftOut", false);
-//   }, 1000);
-// }
 
 nextWk.onclick = () => renderNextWeek(nextMonday);
 prevWk.onclick = () => renderPreviousWeek(nextMonday);
