@@ -326,9 +326,8 @@ const ch_frequency = ({ value }) => {
     
   } else if (value == 'week') {
     
-    x_values = [...new Set(tasks.map(obj=>new Date(parseInt(obj.date)).toLocaleDateString()))].map((_,i)=>Math.floor((i+1)/5)+1);
+    x_values = [ ... new Set([...new Set(tasks.map(obj=>new Date(parseInt(obj.date)).toLocaleDateString()))].map((_,i)=>Math.floor((i+1)/5)+1))];
   }
-  x_values.map(date => date.substr(3, 3) + date.substr(8, 4));
 
   start.innerHTML = '';
   end.innerHTML = '';

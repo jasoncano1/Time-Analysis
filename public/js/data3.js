@@ -840,5 +840,18 @@ VALUES
 (1,'Robotics Development', 1749063600000,'done'),
 (1,'Robotics Development', 1749067200000,'done'),
 (1,'Driving', 1749070800000,'done'),
-(1,'HEB', 1749074400000,'done');
+(1,'HEB', 1749074400000,'done'),
+(1,'Coding Development', 1749477600000,'done'),
+(1,'Coding Development', 1749481200000,'done'),
+(1,'Robotics Development', 1749484800000,'done'),
+(1,'Robotics Development', 1749488400000,'done'),
+(1,'Lunch', 174949200000,'done'),
+(1,'Coding Development', 174956400000,'done'),
+(1,'Robotics Development', 1749567600000,'done'),
+(1,'Robotics Development', 1749571200000,'done'),
+(1,'Lunch', 17495574800000,'done'),
+(1,'Driving', 1749582000000,'done'),
+(1,'HEB', 1749585600000,'done'),
+(1,'Driving', 1749589200000,'done'),
+(1,'Put up Groceries', 1749592800000,'done');
 
