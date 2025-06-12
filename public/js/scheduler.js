@@ -314,19 +314,46 @@ const graphData = (x, y1, y2) => {
   Plotly.newPlot('graph01', data, layout)
 };
 
+
+let getWk = ms => {
+
+  let wk = 0;
+  let isWk = false;
+  let oneWk = 604800000;
+  let janOne = new Date(new Date(parseInt(ms)).getFullYear(), 0, 1).getTime();
+
+  while (!isWk) {
+    wk++;
+    janOne += oneWk;
+    isWk = janOne > parseInt(ms)
+  };
+
+  return wk + '/' + new Date(parseInt(ms)).getFullYear();
+}
+
 const ch_frequency = ({ value }) => {
 
-  
+
   if (value == 'day') {
-    
+
     x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
     filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
     y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
     y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
-    
+
   } else if (value == 'week') {
-    
-    x_values = [ ... new Set([...new Set(tasks.map(obj=>new Date(parseInt(obj.date)).toLocaleDateString()))].map((_,i)=>Math.floor((i+1)/5)+1))];
+
+    x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
+
+    let wkObj = x_values.map(wk => {
+      return { [wk]: 0 }
+    });
+
+    tasks.map(({ date }) => x_values.map(wk => {
+      if (wk == getWk(date)) wkObj[wk] += 1
+    }));
+
+    y_values1 = Object.values(wkObj);
   }
 
   start.innerHTML = '';
