@@ -314,7 +314,6 @@ const graphData = (x, y1, y2) => {
   Plotly.newPlot('graph01', data, layout)
 };
 
-
 let getWk = ms => {
 
   let wk = 0;
@@ -333,7 +332,6 @@ let getWk = ms => {
 
 const ch_frequency = ({ value }) => {
 
-
   if (value == 'day') {
 
     x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
@@ -345,15 +343,26 @@ const ch_frequency = ({ value }) => {
 
     x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
 
-    let wkObj = x_values.map(wk => {
-      return { [wk]: 0 }
-    });
+    let wkObj = {};
+    let doneObj = {};
 
-    tasks.map(({ date }) => x_values.map(wk => {
-      if (wk == getWk(date)) wkObj[wk] += 1
-    }));
+    tasks.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
 
-    y_values1 = Object.values(wkObj);
+    x_values.forEach(wk => { tasks.forEach(({ status, date }) => {
+      getWk(date) == wk && status == 'done'
+        ? Object.keys(doneObj).includes(wk)
+            ? doneObj[wk] += 1
+            : doneObj[wk] = 1
+        : Object.keys(doneObj).includes(wk)
+            ? doneObj[wk] += 0
+            : doneObj[wk] = 0
+    })});
+    
+    y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
+    y_values2 = Object.values(doneObj).map(v => Math.round(v / 45 * 100));
+
+  } else if (value == 'month') {
+    
   }
 
   start.innerHTML = '';
@@ -365,7 +374,7 @@ const ch_frequency = ({ value }) => {
     end.value = end.lastChild.value;
   });
 
-
+  graphData(x_values, y_values1, y_values2)
 }
 const ch_start = ({ value }) => {
   x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
