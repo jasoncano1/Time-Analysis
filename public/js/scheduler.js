@@ -339,6 +339,10 @@ const ch_frequency = ({ value }) => {
     y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
     y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
 
+    totalScheduled = y_values1.reduce((a,b)=>a+b,0)/100;
+    totalDone = y_values2.reduce((a,b)=>a+b,0)/100;
+    totalHours = x_values.length;
+
   } else if (value == 'week') {
 
     x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
@@ -359,7 +363,11 @@ const ch_frequency = ({ value }) => {
     })});
     
     y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
-    y_values2 = Object.values(doneObj).map(v => Math.round(v / 45 * 100));
+    y_values2 = Object.values(doneObj).map((v,i)=>v/Object.values(wkObj)[i] * 100);
+
+    totalScheduled = y_values1.reduce((a,b)=>a+b,0)/100;
+    totalDone = y_values2.reduce((a,b)=>a+b,0)/100;
+    totalHours = x_values.length;
 
   } else if (value == 'month') {
     
@@ -374,21 +382,55 @@ const ch_frequency = ({ value }) => {
     end.value = end.lastChild.value;
   });
 
+  renderGauges();
   graphData(x_values, y_values1, y_values2)
 }
 const ch_start = ({ value }) => {
-  x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
-  x_values = x_values.filter(d => x_values.indexOf(d) >= x_values.indexOf(value));
-  filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
-  y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
-  y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
 
-  totalDone = 0;
-  totalScheduled = 0;
-  totalHours = filterData.length * 9;
+  let fq = document.getElementById('frequency').value;
 
-  filterData.map(obj => obj.length).forEach(amount => totalScheduled += amount);
-  filterData.map(arr => arr.filter(({ status }) => status == 'done').length).forEach(amount => totalDone += amount);
+  if(fq == 'day') {
+
+    x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
+    x_values = x_values.filter(d => x_values.indexOf(d) >= x_values.indexOf(value));
+    filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
+    y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
+    y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
+    
+    totalDone = 0;
+    totalScheduled = 0;
+    totalHours = filterData.length * 9;
+    
+    filterData.map(obj => obj.length).forEach(amount => totalScheduled += amount);
+    filterData.map(arr => arr.filter(({ status }) => status == 'done').length).forEach(amount => totalDone += amount);
+    
+  } else if (fq == 'week') {
+
+    x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
+
+    wkObj = {};
+    doneObj = {};
+
+    tasks.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
+
+    x_values.forEach(wk => { tasks.forEach(({ status, date }) => {
+      getWk(date) == wk && status == 'done'
+        ? Object.keys(doneObj).includes(wk)
+            ? doneObj[wk] += 1
+            : doneObj[wk] = 1
+        : Object.keys(doneObj).includes(wk)
+            ? doneObj[wk] += 0
+            : doneObj[wk] = 0
+    })});
+    
+    y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
+    y_values2 = Object.values(doneObj).map(v => Math.round(v / 45 * 100));
+
+    totalDone = 0;
+    totalScheduled = 0;
+    totalHours = filterData.length * 9;
+
+  }
 
   renderGauges();
   end.innerHTML = '';
