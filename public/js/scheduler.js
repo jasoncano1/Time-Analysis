@@ -339,38 +339,40 @@ const ch_frequency = ({ value }) => {
     y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
     y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
 
-    totalScheduled = y_values1.reduce((a,b)=>a+b,0)/100;
-    totalDone = y_values2.reduce((a,b)=>a+b,0)/100;
+    totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
+    totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
     totalHours = x_values.length;
 
   } else if (value == 'week') {
 
     x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
 
-    let wkObj = {};
-    let doneObj = {};
+    wkObj = {};
+    doneObj = {};
 
     tasks.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
 
-    x_values.forEach(wk => { tasks.forEach(({ status, date }) => {
-      getWk(date) == wk && status == 'done'
-        ? Object.keys(doneObj).includes(wk)
+    x_values.forEach(wk => {
+      tasks.forEach(({ status, date }) => {
+        getWk(date) == wk && status == 'done'
+          ? Object.keys(doneObj).includes(wk)
             ? doneObj[wk] += 1
             : doneObj[wk] = 1
-        : Object.keys(doneObj).includes(wk)
+          : Object.keys(doneObj).includes(wk)
             ? doneObj[wk] += 0
             : doneObj[wk] = 0
-    })});
-    
-    y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
-    y_values2 = Object.values(doneObj).map((v,i)=>v/Object.values(wkObj)[i] * 100);
+      })
+    });
 
-    totalScheduled = y_values1.reduce((a,b)=>a+b,0)/100;
-    totalDone = y_values2.reduce((a,b)=>a+b,0)/100;
-    totalHours = x_values.length;
+    y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
+    y_values2 = Object.values(doneObj).map((v, i) => v / Object.values(wkObj)[i] * 100);
+
+    totalScheduled = Object.values(wkObj).reduce((a, b) => a + b, 0);
+    totalDone = Object.values(doneObj).reduce((a, b) => a + b, 0);
+    totalHours = x_values.length * 45;
 
   } else if (value == 'month') {
-    
+
   }
 
   start.innerHTML = '';
@@ -389,40 +391,42 @@ const ch_start = ({ value }) => {
 
   let fq = document.getElementById('frequency').value;
 
-  if(fq == 'day') {
+  if (fq == 'day') {
 
     x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
     x_values = x_values.filter(d => x_values.indexOf(d) >= x_values.indexOf(value));
     filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
     y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
     y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
-    
+
     totalDone = 0;
     totalScheduled = 0;
     totalHours = filterData.length * 9;
-    
+
     filterData.map(obj => obj.length).forEach(amount => totalScheduled += amount);
     filterData.map(arr => arr.filter(({ status }) => status == 'done').length).forEach(amount => totalDone += amount);
-    
+
   } else if (fq == 'week') {
 
+    min = Math.min(...tasks.filter(obj => getWk(obj.date) == value).map(obj => parseInt(obj.date)));
+
     x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
+    filterData = tasks.filter(obj => parseInt(obj.date) >= min);
 
     wkObj = {};
     doneObj = {};
 
-    tasks.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
+    filterData.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
 
-    x_values.forEach(wk => { tasks.forEach(({ status, date }) => {
-      getWk(date) == wk && status == 'done'
-        ? Object.keys(doneObj).includes(wk)
-            ? doneObj[wk] += 1
-            : doneObj[wk] = 1
-        : Object.keys(doneObj).includes(wk)
-            ? doneObj[wk] += 0
-            : doneObj[wk] = 0
-    })});
-    
+    filterData.forEach(({ status, date }) => {
+      if (status == 'done') {
+        let wk = getWk(date);
+        Object.keys(doneObj).includes(wk)
+          ? doneObj[wk] += 1
+          : doneObj[wk] = 1
+      }
+    });
+
     y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
     y_values2 = Object.values(doneObj).map(v => Math.round(v / 45 * 100));
 
@@ -437,7 +441,7 @@ const ch_start = ({ value }) => {
   x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
   end.value = end.lastChild.innerHTML;
 
-  graphData(x_values, y_values1, y_values2);
+  graphData([... new Set(filterData.map(obj=>getWk(obj.date)))], y_values1, y_values2);
 };
 
 const analysisGraph = () => {
@@ -508,6 +512,8 @@ const ch_end = ({ value }) => {
   end.value = value;
 
   graphData(x_values, y_values1, y_values2);
+
+  //     x_values = [... new Set(tasks.filter(obj=> parseInt(obj.date)>=min).map(obj=>getWk(obj.date)))];
 }
 
 init(d);
