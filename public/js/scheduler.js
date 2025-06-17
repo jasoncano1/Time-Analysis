@@ -9,7 +9,7 @@ const main = document.getElementById('main');
 const nextWk = document.getElementById('nextWeek');
 const prevWk = document.getElementById('prevWeek');
 const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
-let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, x_values, y_values1, y_values2, tuesday, weekdays, thursday, checkbox, username, wednesday, filterData;
+let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, start_options, x_values, y_values1, y_values2, tuesday, weekdays, thursday, checkbox, username, wednesday, filterData;
 
 const getWkDays = d => {
   monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).toLocaleDateString();
@@ -334,8 +334,10 @@ const ch_frequency = ({ value }) => {
 
   if (value == 'day') {
 
-    x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
-    filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
+    start_options = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
+    filterData = tasks.filter(({ date }) => parseInt(date) >= new Date(value).toLocaleDateString());
+
+    x_values = [ ...new Set(filterData.map(obj=> new Date(parseInt(obj.date)).toLocaleDateString()))];
     y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
     y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
 
@@ -345,7 +347,9 @@ const ch_frequency = ({ value }) => {
 
   } else if (value == 'week') {
 
-    x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
+    start_options = [... new Set(tasks.map(({ date }) => getWk(date)))];
+
+    
 
     wkObj = {};
     doneObj = {};
@@ -393,7 +397,7 @@ const ch_start = ({ value }) => {
 
   if (fq == 'day') {
 
-    x_values = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
+    start_options = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
     x_values = x_values.filter(d => x_values.indexOf(d) >= x_values.indexOf(value));
     filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
     y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
@@ -408,7 +412,7 @@ const ch_start = ({ value }) => {
 
   } else if (fq == 'week') {
 
-    min = Math.min(...tasks.filter(obj => getWk(obj.date) == value).map(obj => parseInt(obj.date)));
+    let min = Math.min(...tasks.filter(obj => getWk(obj.date) == value).map(obj => parseInt(obj.date)));
 
     x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
     filterData = tasks.filter(obj => parseInt(obj.date) >= min);
@@ -441,7 +445,7 @@ const ch_start = ({ value }) => {
   x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
   end.value = end.lastChild.innerHTML;
 
-  graphData([... new Set(filterData.map(obj=>getWk(obj.date)))], y_values1, y_values2);
+  graphData(x_values, y_values1, y_values2);
 };
 
 const analysisGraph = () => {
