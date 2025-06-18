@@ -9,7 +9,7 @@ const main = document.getElementById('main');
 const nextWk = document.getElementById('nextWeek');
 const prevWk = document.getElementById('prevWeek');
 const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
-let day, hour, data, data2, tasks, layout, monday, friday, layout2, user_id, start_options, x_values, y_values1, y_values2, tuesday, weekdays, thursday, checkbox, username, wednesday, filterData;
+let day, hour, data, data2, tasks, transformed_tasks, layout, monday, friday, layout2, user_id, start_options, end_options, x_values, y_values1, y_values2, tuesday, weekdays, thursday, checkbox, username, wednesday, filterData;
 
 const getWkDays = d => {
   monday = new Date(d.getDay != 1 ? d - (d.getDay() - 1) * 86400000 : d).toLocaleDateString();
@@ -279,13 +279,21 @@ const renderGauges = () => {
   Plotly.newPlot('chart2b', data2, layout);
 };
 
-const getUser = async username => await (await fetch('/api/data', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ username })
-})).json();
+const getUser = async username => {
+  let data = await (await fetch('/api/data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username })
+  })).json();
+
+  return data.map(obj => {
+    let date = parseInt(obj.date);
+    return { ...obj, date }
+
+  }).sort((a, b) => a.date - b.date);
+};
 
 const graphData = (x, y1, y2) => {
   graph01.innerHTML = '';
@@ -334,12 +342,16 @@ const ch_frequency = ({ value }) => {
 
   if (value == 'day') {
 
-    start_options = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
-    filterData = tasks.filter(({ date }) => parseInt(date) >= new Date(value).toLocaleDateString());
+    transformed_tasks = tasks.map(obj => {
+      let date = new Date(obj.date).toLocaleDateString();
+      return { ...obj, date }
+    });
 
-    x_values = [ ...new Set(filterData.map(obj=> new Date(parseInt(obj.date)).toLocaleDateString()))];
-    y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
-    y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
+    start_options = [...new Set(transformed_tasks.map(obj => obj.date))];
+    x_values = start_options;
+
+    y_values1 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d).length / 9 * 100);
+    y_values2 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d & obj.status == 'done').length / 9 * 100);
 
     totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
     totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
@@ -349,7 +361,7 @@ const ch_frequency = ({ value }) => {
 
     start_options = [... new Set(tasks.map(({ date }) => getWk(date)))];
 
-    
+
 
     wkObj = {};
     doneObj = {};
@@ -391,24 +403,28 @@ const ch_frequency = ({ value }) => {
   renderGauges();
   graphData(x_values, y_values1, y_values2)
 }
-const ch_start = ({ value }) => {
+const ch_range = () => {
 
-  let fq = document.getElementById('frequency').value;
+  start_value = document.getElementById('start').value;
+  end_value = document.getElementById('end').value;
+  fq = document.getElementById('frequency').value;
 
   if (fq == 'day') {
 
-    start_options = [...new Set(tasks.map(({ date }) => parseInt(date)).sort().map(ms => new Date(ms).toLocaleDateString()))];
-    x_values = x_values.filter(d => x_values.indexOf(d) >= x_values.indexOf(value));
-    filterData = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
-    y_values1 = x_values.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
-    y_values2 = x_values.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
+    transformed_tasks = tasks.map(obj => {
+      let date = new Date(obj.date).toLocaleDateString();
+      return { ...obj, date }
+    });
 
-    totalDone = 0;
-    totalScheduled = 0;
-    totalHours = filterData.length * 9;
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.indexOf(start_value) && i <= transformed_tasks.indexOf(end_value));
+    x_values = [...new Set(filterData.map(obj => obj.date))];
 
-    filterData.map(obj => obj.length).forEach(amount => totalScheduled += amount);
-    filterData.map(arr => arr.filter(({ status }) => status == 'done').length).forEach(amount => totalDone += amount);
+    y_values1 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d).length / 9 * 100);
+    y_values2 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d & obj.status == 'done').length / 9 * 100);
+
+    totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
+    totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
+    totalHours = x_values.length;
 
   } else if (fq == 'week') {
 
@@ -464,10 +480,10 @@ const analysisGraph = () => {
           <option>week</option>
           <option>month</option>
         </select>
-        <select id="start" onchange="ch_start(this)">
+        <select id="start" onchange="ch_range()">
           ${x_values.map(date => `<option> ${date}</option>`)}
         </select>
-        <select id="end" onchange="ch_end(this)">
+        <select id="end" onchange="ch_range()">
           ${x_values.map(date => `<option> ${date}</option>`)}
         </select>
       </div>
@@ -495,30 +511,6 @@ const analysisGraph = () => {
     main.classList.toggle("slideLeftOut", false);
   }, 1000);
 };
-
-const ch_end = ({ value }) => {
-
-  let x_values2 = x_values.filter(d => x_values.indexOf(d) <= x_values.indexOf(value));
-  filterData = x_values2.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d));
-  y_values1 = x_values2.map(d => tasks.filter(({ date }) => new Date(parseInt(date)).toLocaleDateString() == d).length / 9 * 100);
-  y_values2 = x_values2.map(d => tasks.filter(({ date, status }) => new Date(parseInt(date)).toLocaleDateString() == d & status == 'done').length / 9 * 100);
-
-  totalDone = 0;
-  totalScheduled = 0;
-  totalHours = filterData.length * 9;
-
-  filterData.map(obj => obj.length).forEach(amount => totalScheduled += amount);
-  filterData.map(arr => arr.filter(({ status }) => status == 'done').length).forEach(amount => totalDone += amount);
-
-  renderGauges();
-  end.innerHTML = '';
-  x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
-  end.value = value;
-
-  graphData(x_values, y_values1, y_values2);
-
-  //     x_values = [... new Set(tasks.filter(obj=> parseInt(obj.date)>=min).map(obj=>getWk(obj.date)))];
-}
 
 init(d);
 today.onclick = renderToday;
