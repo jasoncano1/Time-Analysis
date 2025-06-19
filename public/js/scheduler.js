@@ -340,85 +340,54 @@ let getWk = ms => {
 
 const ch_frequency = ({ value }) => {
 
-  if (value == 'day') {
+  if(value == 'day') {
 
     transformed_tasks = tasks.map(obj => {
       let date = new Date(obj.date).toLocaleDateString();
       return { ...obj, date }
     });
 
-    start_options = [...new Set(transformed_tasks.map(obj => obj.date))];
-    x_values = start_options;
-
-    y_values1 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d).length / 9 * 100);
-    y_values2 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d & obj.status == 'done').length / 9 * 100);
-
-    totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
-    totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
-    totalHours = x_values.length;
-
   } else if (value == 'week') {
-
-    start_options = [... new Set(tasks.map(({ date }) => getWk(date)))];
-
-
-
-    wkObj = {};
-    doneObj = {};
-
-    tasks.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
-
-    x_values.forEach(wk => {
-      tasks.forEach(({ status, date }) => {
-        getWk(date) == wk && status == 'done'
-          ? Object.keys(doneObj).includes(wk)
-            ? doneObj[wk] += 1
-            : doneObj[wk] = 1
-          : Object.keys(doneObj).includes(wk)
-            ? doneObj[wk] += 0
-            : doneObj[wk] = 0
-      })
+    
+    transformed_tasks = tasks.map(obj => {
+      let date = getWk(obj.date);
+      return { ...obj, date};
     });
 
-    y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
-    y_values2 = Object.values(doneObj).map((v, i) => v / Object.values(wkObj)[i] * 100);
+  };
 
-    totalScheduled = Object.values(wkObj).reduce((a, b) => a + b, 0);
-    totalDone = Object.values(doneObj).reduce((a, b) => a + b, 0);
-    totalHours = x_values.length * 45;
+   start_options = [...new Set(transformed_tasks.map(obj => obj.date))];
+    x_values = start_options;
+    
+    start.innerHTML = '';
+    end.innerHTML = '';
+    
+    x_values.map(date => {
+      start.innerHTML += `<option>${date}</option>`;
+      end.innerHTML += `<option>${date}</option>`;
+      end.value = end.lastChild.value;
+    });
 
-  } else if (value == 'month') {
+  ch_range();
+};
 
-  }
-
-  start.innerHTML = '';
-  end.innerHTML = '';
-
-  x_values.map(date => {
-    start.innerHTML += `<option>${date}</option>`;
-    end.innerHTML += `<option>${date}</option>`;
-    end.value = end.lastChild.value;
-  });
-
-  renderGauges();
-  graphData(x_values, y_values1, y_values2)
-}
 const ch_range = () => {
 
+  fq = document.getElementById('frequency').value;
   start_value = document.getElementById('start').value;
   end_value = document.getElementById('end').value;
-  fq = document.getElementById('frequency').value;
 
+  
   if (fq == 'day') {
 
     transformed_tasks = tasks.map(obj => {
-      let date = new Date(obj.date).toLocaleDateString();
-      return { ...obj, date }
-    });
-
-    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.indexOf(start_value) && i <= transformed_tasks.indexOf(end_value));
+        let date = new Date(obj.date).toLocaleDateString();
+        return { ...obj, date }
+      });
+  
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj=>obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj=>obj.date).indexOf(end_value));
     x_values = [...new Set(filterData.map(obj => obj.date))];
-
+    
     y_values1 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d).length / 9 * 100);
     y_values2 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d & obj.status == 'done').length / 9 * 100);
 
@@ -428,15 +397,13 @@ const ch_range = () => {
 
   } else if (fq == 'week') {
 
-    let min = Math.min(...tasks.filter(obj => getWk(obj.date) == value).map(obj => parseInt(obj.date)));
-
-    x_values = [... new Set(tasks.map(({ date }) => getWk(date)))];
-    filterData = tasks.filter(obj => parseInt(obj.date) >= min);
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj=>obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj=>obj.date).indexOf(end_value));
+    x_values = [...new Set(filterData.map(obj => obj.date))];
 
     wkObj = {};
     doneObj = {};
 
-    filterData.map(({ date }) => getWk(date)).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1)
+    x_values.forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1);
 
     filterData.forEach(({ status, date }) => {
       if (status == 'done') {
@@ -457,10 +424,6 @@ const ch_range = () => {
   }
 
   renderGauges();
-  end.innerHTML = '';
-  x_values.forEach(val => { end.innerHTML += `<option>${val}</option>` });
-  end.value = end.lastChild.innerHTML;
-
   graphData(x_values, y_values1, y_values2);
 };
 
