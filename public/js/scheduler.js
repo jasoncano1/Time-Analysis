@@ -82,10 +82,7 @@ const populateWk = async d => {
   main.innerHTML = '';
 
   weekdays.forEach((date, i) => {
-
     dateTimes.forEach(dayTime => {
-
-
       let dTime = new Date(parseInt(dayTime)).toLocaleDateString();
 
       if (dTime == date) {
@@ -357,12 +354,11 @@ const ch_frequency = ({ value }) => {
   };
 
    start_options = [...new Set(transformed_tasks.map(obj => obj.date))];
-    x_values = start_options;
     
     start.innerHTML = '';
     end.innerHTML = '';
     
-    x_values.map(date => {
+    start_options.map(date => {
       start.innerHTML += `<option>${date}</option>`;
       end.innerHTML += `<option>${date}</option>`;
       end.value = end.lastChild.value;
@@ -403,25 +399,33 @@ const ch_range = () => {
     wkObj = {};
     doneObj = {};
 
-    x_values.forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1);
+    filterData.map(obj=>obj.date).forEach(wk => Object.keys(wkObj).includes(wk) ? wkObj[wk] += 1 : wkObj[wk] = 1);
 
     filterData.forEach(({ status, date }) => {
-      if (status == 'done') {
-        let wk = getWk(date);
-        Object.keys(doneObj).includes(wk)
-          ? doneObj[wk] += 1
-          : doneObj[wk] = 1
-      }
+      status == 'done'
+        ? Object.keys(doneObj).includes(date)
+            ? doneObj[date] += 1
+            : doneObj[date] = 1
+        : Object.keys(doneObj).includes(date)
+            ? doneObj[date] += 0
+            : doneObj[date] = 0
     });
 
     y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
     y_values2 = Object.values(doneObj).map(v => Math.round(v / 45 * 100));
 
-    totalDone = 0;
-    totalScheduled = 0;
-    totalHours = filterData.length * 9;
+    totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
+    totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
+    totalHours = x_values.length;
+  };
 
-  }
+  end.innerHTML = '';
+  start_options = [ ...new Set(transformed_tasks.map(obj => obj.date))];
+
+  start_options.forEach((date, i) => {
+    if(i >= start_options.indexOf(start_value)) end.innerHTML += `<option>${date}</option>`;
+    end.value = end_value;
+  });
 
   renderGauges();
   graphData(x_values, y_values1, y_values2);
