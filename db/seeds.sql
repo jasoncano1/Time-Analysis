@@ -505,4 +505,9 @@ VALUES
     (489,1,'Robotics Development',1750438800000,'done'),
     (490,1,'Lunch',1750442400000,'done'),
     (491,1,'Robotics Development',1750446000000,'done'),
-    (492,1,'Clean',1750449600000,'done');
+    (492,1,'Clean',1750449600000,'done'),
+    (496,1,'Robotic',1750701600000,'done'),
+    (497,1,'Robotic',1750705200000,'done'),
+    (498,1,'Robotic',1750708800000,'done'),
+    (508,1,'Cleaning',1750712400000,'done'),
+    (509,1,'Cleaning',1750716000000,'done');
