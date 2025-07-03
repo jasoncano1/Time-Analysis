@@ -351,6 +351,16 @@ const ch_frequency = ({ value }) => {
       return { ...obj, date };
     });
 
+  } else if (value == 'month') {
+
+    transformed_tasks = tasks.map(obj => {
+      let arrDate = new Date(obj.date).toDateString().split(' ');
+      let date = `${arrDate[1]}/${arrDate[3]}`;
+
+      return { ...obj, date };
+
+    });
+
   };
 
   start_options = [...new Set(transformed_tasks.map(obj => obj.date))];
@@ -366,6 +376,7 @@ const ch_frequency = ({ value }) => {
 
   ch_range();
 };
+
 
 const ch_range = () => {
 
@@ -413,6 +424,33 @@ const ch_range = () => {
 
     y_values1 = Object.values(wkObj).map(v => Math.round(v / 45 * 100));
     y_values2 = Object.values(doneObj).map(v => Math.round(v / 45 * 100));
+
+    totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
+    totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
+    totalHours = x_values.length;
+
+  }  else if (fq == 'month') {
+
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).indexOf(end_value));
+    x_values = [...new Set(filterData.map(obj => obj.date))];
+
+    monthObj = {};
+    doneObj = {};
+
+    filterData.map(obj => obj.date).forEach(month => Object.keys(monthObj).includes(month) ? monthObj[month] += 1 : monthObj[month] = 1);
+
+    filterData.forEach(({ status, date }) => {
+      status == 'done'
+        ? Object.keys(doneObj).includes(date)
+          ? doneObj[date] += 1
+          : doneObj[date] = 1
+        : Object.keys(doneObj).includes(date)
+          ? doneObj[date] += 0
+          : doneObj[date] = 0
+    });
+
+    y_values1 = Object.values(monthObj).map(v => Math.round(v / 195 * 100));
+    y_values2 = Object.values(doneObj).map(v => Math.round(v / 195 * 100));
 
     totalScheduled = y_values1.reduce((a, b) => a + b, 0) / 100;
     totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
