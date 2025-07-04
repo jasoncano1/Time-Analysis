@@ -162,9 +162,9 @@ const handleChange = async dayTime => {
       hour.style.textDecoration = "line-through"
     );
 
-  tasks = tasks.filter(obj => obj.date !== dayTime);
-
   let ms = new Date(dayTime.substr(0, dayTime.length - 2) + ':00 ' + dayTime.substr(dayTime.length - 2)).getTime();
+
+  tasks = tasks.filter(obj => obj.date !== ms);
 
   let newTask = { user_id, date: ms, task: hour.value, status: checkbox.checked ? "done" : "pending" };
   tasks.push(newTask);
@@ -358,9 +358,7 @@ const ch_frequency = ({ value }) => {
       let date = `${arrDate[1]}/${arrDate[3]}`;
 
       return { ...obj, date };
-
     });
-
   };
 
   start_options = [...new Set(transformed_tasks.map(obj => obj.date))];
@@ -392,7 +390,7 @@ const ch_range = () => {
       return { ...obj, date }
     });
 
-    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).indexOf(end_value));
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).lastIndexOf(end_value));
     x_values = [...new Set(filterData.map(obj => obj.date))];
 
     y_values1 = x_values.map(d => transformed_tasks.filter(obj => obj.date == d).length / 9 * 100);
@@ -404,7 +402,7 @@ const ch_range = () => {
 
   } else if (fq == 'week') {
 
-    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).indexOf(end_value));
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).lastIndexOf(end_value));
     x_values = [...new Set(filterData.map(obj => obj.date))];
 
     wkObj = {};
@@ -429,9 +427,9 @@ const ch_range = () => {
     totalDone = y_values2.reduce((a, b) => a + b, 0) / 100;
     totalHours = x_values.length;
 
-  }  else if (fq == 'month') {
+  } else if (fq == 'month') {
 
-    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).indexOf(end_value));
+    filterData = transformed_tasks.filter((_, i) => i >= transformed_tasks.map(obj => obj.date).indexOf(start_value) && i <= transformed_tasks.map(obj => obj.date).lastIndexOf(end_value));
     x_values = [...new Set(filterData.map(obj => obj.date))];
 
     monthObj = {};
