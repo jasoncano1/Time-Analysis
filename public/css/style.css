@@ -197,6 +197,10 @@ section div input {
   margin: 0 3px;
 }
 
+select {
+  width: 70%;
+}
+
 .past {
   background: #e67171d1;
 }
